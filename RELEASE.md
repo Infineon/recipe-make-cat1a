@@ -17,6 +17,8 @@ The this release of the PSoC 6 GNU make build recipe includes complete support f
 This also includes the getlibs.bash script that can be used directly, or via the make target to download additional git repo based libraries for the application.
 
 ### What Changed?
+#### v1.5.1
+* Fixed bug in PSoC 6 CM0+ Eclipse programming launch config file
 #### v1.5.0
 * Added support for finding patched versions of the ModusToolbox tools
 * Added support for .mtb files
