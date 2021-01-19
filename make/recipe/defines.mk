@@ -434,6 +434,9 @@ endif
 # Expected format for Cypress multi core device is {MPN-name}{Core}.
 CY_IAR_DEVICE_NAME=$(DEVICE)$(CY_IAR_CORE_SUFFIX)
 
+# The architecture name is needed for the CPRJ and CPDSC
+CY_CMSIS_ARCH_NAME=PSoC6_DFP
+
 ifeq ($(filter eclipse,$(MAKECMDGOALS)),eclipse)
 CY_ECLIPSE_ARGS+="s|&&CY_OPENOCD_SECOND_RESET&&|$(CY_OPENOCD_SECOND_RESET_TYPE)|g;"\
 				"s|&&CY_OPENOCD_RUN_RESTART_DEBUG_CMD&&|$(CY_OPENOCD_RUN_RESTART_CMD_DEBUG_ECLIPSE)|g;"\
