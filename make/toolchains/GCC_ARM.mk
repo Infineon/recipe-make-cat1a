@@ -112,13 +112,21 @@ else ifeq ($(CORE),CM4)
 CY_TOOLCHAIN_FLAGS_CORE=-mcpu=cortex-m4 $(CY_TOOLCHAIN_NEWLIBNANO)
 ifeq ($(VFP_SELECT),hardfp)
 CY_TOOLCHAIN_VFP_FLAGS=-mfloat-abi=hard -mfpu=fpv4-sp-d16
+else ifeq ($(VFP_SELECT),softfloat)
+CY_TOOLCHAIN_VFP_FLAGS=
 else
 CY_TOOLCHAIN_VFP_FLAGS=-mfloat-abi=softfp -mfpu=fpv4-sp-d16
 endif
 else ifeq ($(CORE),CM33)
+ifeq ($(DSPEXT),no)
+CY_TOOLCHAIN_FLAGS_CORE=-mcpu=cortex-m33+nodsp $(CY_TOOLCHAIN_NEWLIBNANO)
+else
 CY_TOOLCHAIN_FLAGS_CORE=-mcpu=cortex-m33 $(CY_TOOLCHAIN_NEWLIBNANO)
+endif
 ifeq ($(VFP_SELECT),hardfp)
 CY_TOOLCHAIN_VFP_FLAGS=-mfloat-abi=hard -mfpu=fpv5-sp-d16
+else ifeq ($(VFP_SELECT),softfloat)
+CY_TOOLCHAIN_VFP_FLAGS=
 else
 CY_TOOLCHAIN_VFP_FLAGS=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
 endif
@@ -187,6 +195,7 @@ CY_TOOLCHAIN_SUFFIX_ARCHIVE=a
 # Toolchain specific flags
 #
 CY_TOOLCHAIN_OUTPUT_OPTION=-o
+CY_TOOLCHAIN_ARCHIVE_LIB_OUTPUT_OPTION=-o
 CY_TOOLCHAIN_MAPFILE=-Wl,-Map,
 CY_TOOLCHAIN_STARTGROUP=-Wl,--start-group
 CY_TOOLCHAIN_ENDGROUP=-Wl,--end-group

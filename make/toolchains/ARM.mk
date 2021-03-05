@@ -110,22 +110,31 @@ CY_TOOLCHAIN_FLAGS_CORE=--cpu=Cortex-M4
 ifeq ($(VFP_SELECT),hardfp)
 CY_TOOLCHAIN_VFP_CFLAGS=-mfloat-abi=hard -mfpu=fpv4-sp-d16
 CY_TOOLCHAIN_VFP_FLAGS=--fpu=FPv4-SP
+else ifeq ($(VFP_SELECT),softfloat)
+CY_TOOLCHAIN_VFP_CFLAGS=
+CY_TOOLCHAIN_VFP_FLAGS=
 else
 CY_TOOLCHAIN_VFP_CFLAGS=-mfloat-abi=softfp -mfpu=fpv4-sp-d16
 CY_TOOLCHAIN_VFP_FLAGS=--fpu=SoftVFP+FPv4-SP
 endif
 else ifeq ($(CORE),CM33)
+ifeq ($(DSPEXT),no)
+CY_TOOLCHAIN_CFLAGS_CORE=-mcpu=cortex-m33+nodsp 
+else
 CY_TOOLCHAIN_CFLAGS_CORE=-mcpu=cortex-m33
+endif
 CY_TOOLCHAIN_FLAGS_CORE=--cpu=Cortex-M33
 ifeq ($(VFP_SELECT),hardfp)
 CY_TOOLCHAIN_VFP_CFLAGS=-mfloat-abi=hard -mfpu=fpv5-sp-d16
 CY_TOOLCHAIN_VFP_FLAGS=--fpu=FPv5-SP
+else ifeq ($(VFP_SELECT),softfloat)
+CY_TOOLCHAIN_VFP_CFLAGS=
+CY_TOOLCHAIN_VFP_FLAGS=
 else
 CY_TOOLCHAIN_VFP_CFLAGS=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
 CY_TOOLCHAIN_VFP_FLAGS=--fpu=SoftVFP+FPv5-SP
 endif
 endif
-
 #
 # Command line flags for c-files
 #
@@ -187,6 +196,7 @@ CY_TOOLCHAIN_SUFFIX_ARCHIVE=ar
 # Toolchain specific flags
 #
 CY_TOOLCHAIN_OUTPUT_OPTION=-o
+CY_TOOLCHAIN_ARCHIVE_LIB_OUTPUT_OPTION=
 CY_TOOLCHAIN_MAPFILE=--map --list 
 CY_TOOLCHAIN_LSFLAGS=--scatter 
 CY_TOOLCHAIN_INCRSPFILE=@

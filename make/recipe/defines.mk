@@ -34,6 +34,11 @@ include $(CY_INTERNAL_BASELIB_PATH)/make/recipe/defines_common.mk
 ################################################################################
 
 #
+# List the supported toolchains
+#
+CY_SUPPORTED_TOOLCHAINS=GCC_ARM IAR ARM A_Clang
+
+#
 # Define the default core
 #
 CORE?=CM4
@@ -89,7 +94,6 @@ CY_OPENOCD_RUN_RESTART_CMD_DEBUG_ECLIPSE=flushregs
 CY_OPENOCD_RUN_RESTART_CMD_ATTACH_ECLIPSE=$(CY_OPENOCD_RUN_RESTART_CMD_DEBUG_ECLIPSE)
 CY_OPENOCD_SMIF_DISABLE=set DISABLE_SMIF 1
 CY_OPENOCD_SMIF_DISABLE_ECLIPSE=-c \&quot;$(CY_OPENOCD_SMIF_DISABLE)\&quot;\&\#13;\&\#10;
-CY_ECLIPSE_TEMPLATES_WILDCARD=$(CORE)/*KitProg3*
 CY_OPENOCD_SHELL_TIMEOUT_CMD=shell sleep 5
 CY_OPENOCD_SHELL_TIMEOUT_ECLIPSE=$(CY_OPENOCD_SHELL_TIMEOUT_CMD)\&\#13;\&\#10;
 else
@@ -119,6 +123,9 @@ CY_PSOC_ARCH=psoc6_secure
 CY_PSOC_DIE_NAME=PSoC6ABLE2Secure
 CY_OPENOCD_CHIP_NAME=psoc64
 CY_OPENOCD_DEVICE_CFG=psoc6_secure.cfg
+CY_JLINK_DEVICE_CFG_PROGRAM=CYB06xx7_CM4_tm
+CY_JLINK_DEVICE_CFG_ATTACH=CYB06xx7_CM4
+CY_JLINK_DEVICE_CFG_DEBUG=CYB06xx7_CM4_tm
 endif
 
 else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A2M)))
@@ -147,6 +154,9 @@ CY_PSOC_ARCH=psoc6_2m_secure
 CY_PSOC_DIE_NAME=PSoC6A2MSecure
 CY_OPENOCD_CHIP_NAME=psoc64
 CY_OPENOCD_DEVICE_CFG=psoc6_2m_secure.cfg
+CY_JLINK_DEVICE_CFG_PROGRAM=CYB06xxA_CM4_tm
+CY_JLINK_DEVICE_CFG_ATTACH=CYB06xxA_CM4
+CY_JLINK_DEVICE_CFG_DEBUG=CYB06xxA_CM4_tm
 endif
 
 else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A512K)))
@@ -165,16 +175,24 @@ CY_PSOC_ARCH=psoc6_512k_secure
 CY_PSOC_DIE_NAME=PSoC6A512KSecure
 CY_OPENOCD_CHIP_NAME=psoc64
 CY_OPENOCD_DEVICE_CFG=psoc6_512k_secure.cfg
+CY_JLINK_DEVICE_CFG_PROGRAM=CYB06xx5_CM4_tm
+CY_JLINK_DEVICE_CFG_ATTACH=CYB06xx5_CM4
+CY_JLINK_DEVICE_CFG_DEBUG=CYB06xx5_CM4_tm
 endif
 
 else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A256K)))
 
 CY_PSOC_ARCH=psoc6_04
 CY_PSOC_DIE_NAME=PSoC6A256K
-CY_OPENOCD_DEVICE_CFG=psoc6_256k.cfg
 CY_JLINK_DEVICE_CFG_PROGRAM=CY8C6xx4_CM0p_sect128KB_tm
 CY_JLINK_DEVICE_CFG_ATTACH=CY8C6xx4_$(CY_JLINKSCRIPT_CORE)_sect128KB
 CY_JLINK_DEVICE_CFG_DEBUG=$(CY_JLINK_DEVICE_CFG_ATTACH)$(CY_JLINK_DEVICE_CFG_DEBUG_SUFFIX)
+ifeq (,$(findstring CY8C45,$(DEVICE)))
+CY_OPENOCD_DEVICE_CFG=psoc6_256k.cfg
+else
+CY_OPENOCD_CHIP_NAME=psoc4500
+CY_OPENOCD_DEVICE_CFG=psoc4500.cfg
+endif
 
 else
 $(call CY_MACRO_ERROR,Incorrect part number $(DEVICE). Check DEVICE variable.)
@@ -216,6 +234,27 @@ else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_SRAM_KB_1024)))
 CY_MEMORY_SRAM=1046528
 else
 $(call CY_MACRO_ERROR,No SRAM memory size defined for $(DEVICE))
+endif
+
+# Core specifics
+CY_CM0P_SUFFIX=cm0plus
+ifeq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_M0P)))
+CY_LINKERSCRIPT_CM4_SUFFIX=cm4
+CY_STARTUP_CM4_SUFFIX=cm4
+else
+CY_LINKERSCRIPT_CM4_SUFFIX=cm4_dual
+CY_STARTUP_CM4_SUFFIX=cm4
+endif
+
+# Architecture specifics
+ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)))
+CY_STARTUP=psoc6_01
+else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A2M)))
+CY_STARTUP=psoc6_02
+else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A512K)))
+CY_STARTUP=psoc6_03
+else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A256K)))
+CY_STARTUP=psoc6_04
 endif
 
 #
@@ -270,21 +309,24 @@ ifeq ($(CY_LINKER_SCRIPT_NAME),)
 $(call CY_MACRO_ERROR,Could not resolve device series for linker script)
 endif
 
+CY_LINKER_SCRIPT_CM0P=$(CY_LINKER_SCRIPT_NAME)_$(CY_CM0P_SUFFIX)
+CY_LINKER_SCRIPT_CM4=$(CY_LINKER_SCRIPT_NAME)_$(CY_LINKERSCRIPT_CM4_SUFFIX)
+CY_STARTUP_CM0P=$(CY_STARTUP)_$(CY_CM0P_SUFFIX)
+CY_STARTUP_CM4=$(CY_STARTUP)_$(CY_STARTUP_CM4_SUFFIX)
+
 
 ################################################################################
 # BSP generation
 ################################################################################
 
 DEVICE_GEN?=$(DEVICE)
-ADDITIONAL_DEVICES_GEN?=$(ADDITIONAL_DEVICES)
 
 # Core specifics
+CY_BSP_CM0P_SUFFIX=cm0plus
 ifeq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_M0P)))
 CY_BSP_LINKERSCRIPT_CM4_SUFFIX=cm4
 CY_BSP_STARTUP_CM4_SUFFIX=cm4
 else
-CY_BSP_LINKERSCRIPT_CM0P_SUFFIX=cm0plus
-CY_BSP_STARTUP_CM0P_SUFFIX=cm0plus
 CY_BSP_LINKERSCRIPT_CM4_SUFFIX=cm4_dual
 CY_BSP_STARTUP_CM4_SUFFIX=cm4
 endif
@@ -340,9 +382,9 @@ endif
 
 endif
 
-CY_BSP_LINKER_SCRIPT_CM0P=$(CY_BSP_LINKER_SCRIPT)_$(CY_BSP_LINKERSCRIPT_CM0P_SUFFIX)
+CY_BSP_LINKER_SCRIPT_CM0P=$(CY_BSP_LINKER_SCRIPT)_$(CY_BSP_CM0P_SUFFIX)
 CY_BSP_LINKER_SCRIPT_CM4=$(CY_BSP_LINKER_SCRIPT)_$(CY_BSP_LINKERSCRIPT_CM4_SUFFIX)
-CY_BSP_STARTUP_CM0P=$(CY_BSP_STARTUP)_$(CY_BSP_STARTUP_CM0P_SUFFIX)
+CY_BSP_STARTUP_CM0P=$(CY_BSP_STARTUP)_$(CY_BSP_CM0P_SUFFIX)
 CY_BSP_STARTUP_CM4=$(CY_BSP_STARTUP)_$(CY_BSP_STARTUP_CM4_SUFFIX)
 
 # Paths
@@ -350,7 +392,7 @@ CY_BSP_TEMPLATES_DIR=$(call CY_MACRO_DIR,$(firstword $(CY_DEVICESUPPORT_SEARCH_P
 ifeq ($(wildcard $(CY_BSP_TEMPLATES_DIR)),)
 CY_BSP_TEMPLATES_DIR=$(call CY_MACRO_DIR,$(firstword $(CY_DEVICESUPPORT_SEARCH_PATH)))/devices/templates/COMPONENT_MTB
 endif
-CY_BSP_DESTINATION_DIR=$(CY_TARGET_GEN_DIR)/COMPONENT_CM0P $(CY_TARGET_GEN_DIR)/COMPONENT_CM4
+CY_TEMPLATES_DIR=$(CY_BSP_TEMPLATES_DIR)
 CY_BSP_DESTINATION_ABSOLUTE=$(abspath $(CY_TARGET_GEN_DIR))
 
 ifeq ($(strip $(CY_BSP_LINKER_SCRIPT) $(CY_BSP_STARTUP)),)
@@ -360,15 +402,59 @@ endif
 # Command for searching files in the template directory
 CY_BSP_SEARCH_FILES_CMD=\
 	-name "system_psoc6*" \
-	-o -name "*$(CY_BSP_STARTUP_CM0P)*" \
-	-o -name "*$(CY_BSP_STARTUP_CM4)*" \
-	-o -name "*$(CY_BSP_LINKER_SCRIPT_CM0P)*" \
-	-o -name "*$(CY_BSP_LINKER_SCRIPT_CM4)*"
+	-o -name "*$(CY_BSP_STARTUP_CM0P)\\.*" \
+	-o -name "*$(CY_BSP_STARTUP_CM4)\\.*" \
+	-o -name "*$(CY_BSP_LINKER_SCRIPT_CM0P)\\.*" \
+	-o -name "*$(CY_BSP_LINKER_SCRIPT_CM4)\\.*"
+
+
+CY_SEARCH_FILES_CMD=
+
+ifneq ($(CY_STARTUP_CM0P),$(CY_BSP_STARTUP_CM0P))
+CY_SEARCH_FILES_CMD+=-name "*$(CY_STARTUP_CM0P)\\.*"
+endif
+
+ifneq ($(CY_STARTUP_CM4),$(CY_BSP_STARTUP_CM4))
+ifneq ($(CY_SEARCH_FILES_CMD),)
+CY_SEARCH_FILES_CMD+=-o
+endif
+CY_SEARCH_FILES_CMD+=-name "*$(CY_STARTUP_CM4)\\.*"
+endif
+
+ifneq ($(CY_LINKER_SCRIPT_CM0P),$(CY_BSP_LINKER_SCRIPT_CM0P))
+ifneq ($(CY_SEARCH_FILES_CMD),)
+CY_SEARCH_FILES_CMD+=-o
+endif
+CY_SEARCH_FILES_CMD+=-name "*$(CY_LINKER_SCRIPT_CM0P)\\.*"
+endif
+
+ifneq ($(CY_LINKER_SCRIPT_CM4),$(CY_BSP_LINKER_SCRIPT_CM4))
+ifneq ($(CY_SEARCH_FILES_CMD),)
+CY_SEARCH_FILES_CMD+=-o
+endif
+CY_SEARCH_FILES_CMD+=-name "*$(CY_LINKER_SCRIPT_CM4)\\.*"
+endif
+
+################################################################################
+# Paths
+################################################################################
+
+# Paths used in program/debug
+ifeq ($(CY_DEVICESUPPORT_PATH),)
+CY_OPENOCD_SVD_PATH?=
+else
+CY_OPENOCD_SVD_PATH?=
+endif
 
 
 ################################################################################
 # IDE specifics
 ################################################################################
+
+ifneq ($(OTA_SUPPORT),)
+# OTA post-build script needs python.
+CY_PYTHON_REQUIREMENT=true
+endif
 
 ifeq ($(filter vscode,$(MAKECMDGOALS)),vscode)
 CY_VSCODE_JSON_PROCESSING=\
@@ -376,21 +462,19 @@ CY_VSCODE_JSON_PROCESSING=\
 		if [[ $(CY_OPENOCD_CHIP_NAME) == "psoc64" ]]; then\
 			grep -v "//PSoC6 Only//" $(CY_VSCODE_OUT_TEMPLATE_PATH)/$$jsonFile >\
 				$(CY_VSCODE_OUT_TEMPLATE_PATH)/__$$jsonFile;\
-			sed -e '/\/\/JLink Start PSoC6 Only\/\//,/\/\/JLink End PSoC6 Only\/\//d'\
-				-e 's/\/\/PSoC64 Only\/\///g' $(CY_VSCODE_OUT_TEMPLATE_PATH)/__$$jsonFile >\
+			sed -e 's/\/\/PSoC64 Only\/\///g' $(CY_VSCODE_OUT_TEMPLATE_PATH)/__$$jsonFile >\
 				$(CY_VSCODE_OUT_TEMPLATE_PATH)/$$jsonFile;\
 		else\
 			grep -v "//PSoC64 Only//" $(CY_VSCODE_OUT_TEMPLATE_PATH)/$$jsonFile >\
 				$(CY_VSCODE_OUT_TEMPLATE_PATH)/__$$jsonFile;\
-			sed -e 's/\/\/JLink Start PSoC6 Only\/\///g' -e 's/\/\/JLink End PSoC6 Only\/\///g'\
-				-e 's/\/\/PSoC6 Only\/\///g' $(CY_VSCODE_OUT_TEMPLATE_PATH)/__$$jsonFile >\
+			sed -e 's/\/\/PSoC6 Only\/\///g' $(CY_VSCODE_OUT_TEMPLATE_PATH)/__$$jsonFile >\
 				$(CY_VSCODE_OUT_TEMPLATE_PATH)/$$jsonFile;\
 		fi;\
 		rm $(CY_VSCODE_OUT_TEMPLATE_PATH)/__$$jsonFile;\
 	fi;
 
 CY_VSCODE_OPENOCD_PROCESSING=\
-	if [[ $(CY_OPENOCD_CHIP_NAME) == "psoc6" ]]; then\
+	if [[ $(CY_OPENOCD_CHIP_NAME) != "psoc64" ]]; then\
 		grep -v "set TARGET_AP cm4_ap" $(CY_VSCODE_OUT_PATH)/openocd.tcl > $(CY_VSCODE_OUT_PATH)/_openocd.tcl;\
 		mv -f $(CY_VSCODE_OUT_PATH)/_openocd.tcl $(CY_VSCODE_OUT_PATH)/openocd.tcl;\
 	fi;\
@@ -464,3 +548,10 @@ modus_DEFAULT_TYPE+=device-configurator smartio-configurator
 
 # PSoC 6 capsense-tuner shares its existence with capsense-configurator
 CY_OPEN_NEWCFG_XML_TYPES+=capsense-tuner
+
+CY_SUPPORTED_TOOL_TYPES+=\
+	device-configurator\
+	seglcd-configurator\
+	smartio-configurator\
+	dfuh-tool\
+	ml-configurator

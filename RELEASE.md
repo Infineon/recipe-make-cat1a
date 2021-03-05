@@ -17,8 +17,8 @@ The this release of the PSoC 6 GNU make build recipe includes complete support f
 This also includes the getlibs.bash script that can be used directly, or via the make target to download additional git repo based libraries for the application.
 
 ### What Changed?
-#### v1.5.2
-* Fixed bug in make uvision5 not working with core-make-v1.6.0
+#### v1.7.0
+* Added ml-configurator
 #### v1.5.1
 * Fixed bug in PSoC 6 CM0+ Eclipse programming launch config file
 #### v1.5.0
@@ -68,7 +68,7 @@ This version of the PSoC 6 build system was validated for compatibility with the
 
 | Software and Tools                        | Version |
 | :---                                      | :----:  |
-| ModusToolbox Software Environment         | 2.1     |
+| ModusToolbox Software Environment         | 2.3     |
 | GCC Compiler                              | 9.2     |
 | IAR Compiler                              | 8.4     |
 | ARM Compiler                              | 6.11    |

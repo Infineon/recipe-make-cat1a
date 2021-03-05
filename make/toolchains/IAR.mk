@@ -55,11 +55,11 @@ endif
 #
 # Build tools
 #
-CC=$(CY_CROSSPATH)/bin/iccarm.exe
+CC=$(CY_CROSSPATH)/bin/iccarm
 CXX=$(CC)
-AS=$(CY_CROSSPATH)/bin/iasmarm.exe
-AR=$(CY_CROSSPATH)/bin/iarchive.exe
-LD=$(CY_CROSSPATH)/bin/ilinkarm.exe
+AS=$(CY_CROSSPATH)/bin/iasmarm
+AR=$(CY_CROSSPATH)/bin/iarchive
+LD=$(CY_CROSSPATH)/bin/ilinkarm
 
 #
 # Elf to bin conversion tool
@@ -112,14 +112,24 @@ CY_TOOLCHAIN_FLAGS_CORE=--cpu Cortex-M4
 CY_TOOLCHAIN_VFP_FLAGS=--fpu FPv4-SP
 ifeq ($(VFP_SELECT),hardfp)
 CY_TOOLCHAIN_VFP_CFLAGS=$(CY_TOOLCHAIN_VFP_FLAGS) --aapcs vfp
+else ifeq ($(VFP_SELECT),softfloat)
+CY_TOOLCHAIN_VFP_FLAGS=
+CY_TOOLCHAIN_VFP_CFLAGS=
 else
 CY_TOOLCHAIN_VFP_CFLAGS=$(CY_TOOLCHAIN_VFP_FLAGS) --aapcs std
 endif
 else ifeq ($(CORE),CM33)
-CY_TOOLCHAIN_FLAGS_CORE=--cpu Cortex-M33
+ifeq ($(DSPEXT),no)
+CY_TOOLCHAIN_FLAGS_CORE=--cpu Cortex-M33.no_dsp 
+else
+CY_TOOLCHAIN_FLAGS_CORE=--cpu Cortex-M33 
+endif
 CY_TOOLCHAIN_VFP_FLAGS=--fpu FPv5-SP
 ifeq ($(VFP_SELECT),hardfp)
 CY_TOOLCHAIN_VFP_CFLAGS=$(CY_TOOLCHAIN_VFP_FLAGS) --aapcs vfp
+else ifeq ($(VFP_SELECT),softfloat)
+CY_TOOLCHAIN_VFP_FLAGS=
+CY_TOOLCHAIN_VFP_CFLAGS=
 else
 CY_TOOLCHAIN_VFP_CFLAGS=$(CY_TOOLCHAIN_VFP_FLAGS) --aapcs std
 endif
@@ -212,6 +222,7 @@ CY_TOOLCHAIN_SUFFIX_ARCHIVE=a
 # Toolchain specific flags
 #
 CY_TOOLCHAIN_OUTPUT_OPTION=-o
+CY_TOOLCHAIN_ARCHIVE_LIB_OUTPUT_OPTION=-o
 CY_TOOLCHAIN_MAPFILE=--map=
 CY_TOOLCHAIN_LSFLAGS=--config=
 CY_TOOLCHAIN_INCRSPFILE=-f 

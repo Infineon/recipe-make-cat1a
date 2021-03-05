@@ -183,7 +183,7 @@
             "showDevDebugOutput": false // When set to true, displays output of GDB.
                                         // This is helpful when something is not working right
         },
-        {//JLink Start PSoC6 Only//
+        {
             "name": "Launch PSoC6 &&CY_TARGET_PROCESSOR_NAME&& (JLink)",
             "type": "cortex-debug",
             "request": "launch",
@@ -231,9 +231,9 @@
             "servertype": "jlink",
             "device": "&&CY_DEVICE_PROGRAM&&",
             "overrideLaunchCommands": [
-                "monitor reset 2",      // Reset via the reset pin
-                "monitor flash erase",
                 "monitor reset 0",      // Reset both core and the peripherals
+                "monitor flash erase",
+                "monitor reset 2",      // Reset via the reset pin
                 "quit"
             ],
             "showDevDebugOutput": false // When set to true, displays output of GDB.
@@ -249,9 +249,9 @@
             "servertype": "jlink",
             "device": "&&CY_DEVICE_PROGRAM&&",
             "overrideLaunchCommands": [
-                "monitor reset 2",      // Reset via the reset pin
-                "-target-download",
                 "monitor reset 0",      // Reset both core and the peripherals
+                "-target-download",
+                "monitor reset 2",      // Reset via the reset pin
                 "monitor go",
                 "quit"
             ],
@@ -259,6 +259,6 @@
                                                         // before device programming
             "showDevDebugOutput": false // When set to true, displays output of GDB.
                                         // This is helpful when something is not working right
-        }//JLink End PSoC6 Only//
+        }
     ]
 }
