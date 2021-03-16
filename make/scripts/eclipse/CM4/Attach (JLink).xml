@@ -20,7 +20,7 @@
 <booleanAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.enableSemihostingIoclientTelnet" value="false"/>
 <booleanAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.enableSwo" value="false"/>
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.firstResetSpeed" value="1000"/>
-<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.firstResetType" value="2"/>
+<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.firstResetType" value="0"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.gdbClientOtherCommands" value="set mem inaccessible-by-default off"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.gdbClientOtherOptions" value=""/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.gdbServerConnection" value="usb"/>

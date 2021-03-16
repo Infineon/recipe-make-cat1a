@@ -44,7 +44,6 @@
                 "set mem inaccessible-by-default off",
                 "-enable-pretty-printing",
                 "set remotetimeout 15",
-                "monitor reset init",
                 // Comment this next line out if you don't want to reload program
                 "monitor program {&&CY_HEX_FILE&&}",
                 "monitor reset run",//PSoC6 Only//
@@ -54,27 +53,27 @@
             ],
             "numberOfProcessors": &&CY_PROCESSOR_COUNT&&,//PSoC6 Only//
             "targetProcessor": &&CY_TARGET_PROCESSOR_NUMBER&&,//PSoC6 Only//  // Set to 0 for the CM0+, set to 1 for the CM4
-            "postStartSessionCommands": [       // Needed if runToMain is false
-                // Following two commands are needed to get gdb and openocd and HW all in sync.
-                // Or, execution context (PC, stack, registers, etc.) look like they are from before reset.
-                // The stepi, is a pretend instruction that does not actually do a stepi, but MUST be done
-                // Its a documented workaround in openocd. Do a 'monitor help' to see more info
-                //
-                // An alternative command to use is "continue" instead of the following two
-                "monitor gdb_sync",
-                "stepi"
+            "postStartSessionCommands": [       
+                // Needed if runToMain is false //PSoC6 Only//
+                // Following two commands are needed to get gdb and openocd and HW all in sync. //PSoC6 Only//
+                // Or, execution context (PC, stack, registers, etc.) look like they are from before reset. //PSoC6 Only//
+                // The stepi, is a pretend instruction that does not actually do a stepi, but MUST be done //PSoC6 Only//
+                // Its a documented workaround in openocd. Do a 'monitor help' to see more info //PSoC6 Only//
+                // //PSoC6 Only//
+                // An alternative command to use is "continue" instead of the following two //PSoC6 Only//
+                "monitor gdb_sync",//PSoC6 Only//
+                "stepi"//PSoC6 Only//
             ],
             "overrideRestartCommands": [
-                "monitor reset init",
+                "monitor reset init",//PSoC6 Only//
                 "monitor reset run",//PSoC6 Only//
                 "monitor sleep 200",//PSoC6 Only//
                 "monitor psoc6 reset_halt sysresetreq"//PSoC6 Only//
-                "monitor halt"//PSoC64 Only//
+                "start"//PSoC64 Only//
             ],
             "postRestartSessionCommands": [
                 "monitor gdb_sync",//PSoC6 Only//
                 "stepi"//PSoC6 Only//
-                "continue"//PSoC64 Only//
             ],
             // svdFile is optional, it can be very large.
             "svdFile": "&&CY_SVD_FILE_NAME&&",
@@ -106,22 +105,20 @@
             ],
             "overrideAttachCommands": [
                 "set mem inaccessible-by-default off",
-                "-enable-pretty-printing",
-                "monitor halt"
+                "-enable-pretty-printing"
             ],
             "numberOfProcessors": &&CY_PROCESSOR_COUNT&&,//PSoC6 Only//
             "targetProcessor": &&CY_TARGET_PROCESSOR_NUMBER&&,//PSoC6 Only//  // Set to 0 for the CM0+, set to 1 for the CM4
             "overrideRestartCommands": [
-                "monitor reset init",
+                "monitor reset init",//PSoC6 Only//
                 "monitor reset run",//PSoC6 Only//
                 "monitor sleep 200",//PSoC6 Only//
                 "monitor psoc6 reset_halt sysresetreq"//PSoC6 Only//
-                "monitor halt"//PSoC64 Only//
+                "start"//PSoC64 Only//
             ],
             "postRestartSessionCommands": [
                 "monitor gdb_sync",//PSoC6 Only//
                 "stepi"//PSoC6 Only//
-                "continue"//PSoC64 Only//
             ],
             // svdFile is optional, it can be very large.
             "svdFile": "&&CY_SVD_FILE_NAME&&",
