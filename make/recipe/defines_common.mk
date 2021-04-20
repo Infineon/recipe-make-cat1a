@@ -83,7 +83,7 @@ CY_BSP_DEVICES_CMD=\
 		$(CY_CONFIG_MODUS_EXEC)\
 		$(CY_CONFIG_LIBFILE)\
 		--build $$designFile\
-		--set-device=$(subst $(CY_SPACE),$(CY_COMMA),$(DEVICE_GEN));\
+		--set-device=$(subst $(CY_SPACE),$(CY_COMMA),$(DEVICE_GEN) $(ADDITIONAL_DEVICES));\
 		cfgStatus=$$(echo $$?);\
 		if [ $$cfgStatus != 0 ]; then echo "ERROR: Device-configuration failed for $$designFile"; exit $$cfgStatus; fi;\
 	else\

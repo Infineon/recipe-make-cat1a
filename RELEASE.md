@@ -17,6 +17,8 @@ The this release of the PSoC 6 GNU make build recipe includes complete support f
 This also includes the getlibs.bash script that can be used directly, or via the make target to download additional git repo based libraries for the application.
 
 ### What Changed?
+#### v1.7.2
+* Fix an issue causing make bsp to not include co-processor into custom bsp's design.modus
 #### v1.7.1
 * Fix an issue with make progtool
 * Improved eclipse and vscode launch configuration
