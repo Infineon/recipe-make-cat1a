@@ -17,6 +17,10 @@ The this release of the PSoC 6 GNU make build recipe includes complete support f
 This also includes the getlibs.bash script that can be used directly, or via the make target to download additional git repo based libraries for the application.
 
 ### What Changed?
+#### v1.8.0
+* Added support for cys06xxa linker script
+* Updated launch configs for PSoC6 256K devices
+* Fixed a compatibility bug introduced with make vscode in core-make-1.8.0
 #### v1.7.2
 * Fix an issue causing make bsp to not include co-processor into custom bsp's design.modus
 #### v1.7.1

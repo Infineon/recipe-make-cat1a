@@ -72,7 +72,11 @@ CY_OPENOCD_CORE=cm0
 CY_OPENOCD_SECOND_RESET_TYPE=init
 CY_GDBINIT_FILE=gdbinit_cm0
 else
+ifneq (,$(findstring CYS06,$(DEVICE)))
+CY_LINKERSCRIPT_SUFFIX?=cm4
+else
 CY_LINKERSCRIPT_SUFFIX?=cm4_dual
+endif
 CY_OPENOCD_EXTRA_PORT_FLAG=gdb_port 3332
 CY_OPENOCD_EXTRA_PORT_ECLIPSE=-c \&quot;$(CY_OPENOCD_EXTRA_PORT_FLAG)\&quot;\&\#13;\&\#10;
 CY_OPENOCD_CM0_DISABLE_FLAG=
@@ -184,9 +188,13 @@ else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A256K)))
 
 CY_PSOC_ARCH=psoc6_04
 CY_PSOC_DIE_NAME=PSoC6A256K
-CY_JLINK_DEVICE_CFG_PROGRAM=CY8C6xx4_CM0p_sect128KB_tm
 CY_JLINK_DEVICE_CFG_ATTACH=CY8C6xx4_$(CY_JLINKSCRIPT_CORE)_sect128KB
 CY_JLINK_DEVICE_CFG_DEBUG=$(CY_JLINK_DEVICE_CFG_ATTACH)$(CY_JLINK_DEVICE_CFG_DEBUG_SUFFIX)
+ifeq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_M0P)))
+CY_JLINK_DEVICE_CFG_PROGRAM=CY8C6xx4_CM4_sect128KB
+else
+CY_JLINK_DEVICE_CFG_PROGRAM=CY8C6xx4_CM0p_sect128KB_tm
+endif
 ifeq (,$(findstring CY8C45,$(DEVICE)))
 CY_OPENOCD_DEVICE_CFG=psoc6_256k.cfg
 else
@@ -238,72 +246,76 @@ endif
 
 # Core specifics
 CY_CM0P_SUFFIX=cm0plus
+CY_STARTUP_CM4_SUFFIX=cm4
 ifeq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_M0P)))
 CY_LINKERSCRIPT_CM4_SUFFIX=cm4
-CY_STARTUP_CM4_SUFFIX=cm4
+else
+ifneq (,$(findstring CYS06,$(DEVICE)))
+CY_LINKERSCRIPT_CM4_SUFFIX=cm4
 else
 CY_LINKERSCRIPT_CM4_SUFFIX=cm4_dual
-CY_STARTUP_CM4_SUFFIX=cm4
+endif
 endif
 
 # Architecture specifics
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)))
-CY_STARTUP=psoc6_01
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A2M)))
-CY_STARTUP=psoc6_02
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A512K)))
-CY_STARTUP=psoc6_03
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A256K)))
-CY_STARTUP=psoc6_04
-endif
+
+#
+# startup files
+#
+CY_MACRO_STARTUP_CALC=$(strip \
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)),\
+	psoc6_01,\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A2M)),\
+	psoc6_02,\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A512K)),\
+	psoc6_03,\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A256K)),\
+	psoc6_04,)))))
 
 #
 # linker scripts
 #
+CY_MACRO_SECURE_LINKER_CALC_INTERNAL=\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_832)),\
+	cyb06xx7,\
+	),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A2M)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_1856)),\
+	$(if $(findstring CYS06,$(1)),\
+	cys06xxa,cyb06xxa)\
+	,),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A512K)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_448)),\
+	cyb06xx5,),\
+	)))
 
-# Secure parts
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_SECURE)))
+CY_MACRO_NON_SECURE_LINKER_CALC_INTERNAL=\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A256K)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_256)),\
+	cy8c6xx4,),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A512K)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_512)),\
+	cy8c6xx5,),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_512)),\
+	cy8c6xx6,\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_1024)),\
+	cy8c6xx7,)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A2M)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_1024)),\
+	cy8c6xx8,\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_2048)),\
+	cy8c6xxa,)),))))
 
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)))
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_832)))
-CY_LINKER_SCRIPT_NAME=cyb06xx7
-endif
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A2M)))
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_1856)))
-CY_LINKER_SCRIPT_NAME=cyb06xxa
-endif
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A512K)))
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_448)))
-CY_LINKER_SCRIPT_NAME=cyb06xx5
-endif
-endif
+CY_MACRO_LINKER_CALC=$(strip \
+	$(if $(findstring $(1),$(CY_DEVICES_SECURE)),\
+	$(call CY_MACRO_SECURE_LINKER_CALC_INTERNAL,$(1)),\
+	$(call CY_MACRO_NON_SECURE_LINKER_CALC_INTERNAL,$(1))\
+	))
 
-# Non-secure part
-else
-
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A256K)))
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_256)))
-CY_LINKER_SCRIPT_NAME=cy8c6xx4
-endif
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A512K)))
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_512)))
-CY_LINKER_SCRIPT_NAME=cy8c6xx5
-endif
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)))
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_512)))
-CY_LINKER_SCRIPT_NAME=cy8c6xx6
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_1024)))
-CY_LINKER_SCRIPT_NAME=cy8c6xx7
-endif
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_DIE_PSOC6A2M)))
-ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_1024)))
-CY_LINKER_SCRIPT_NAME=cy8c6xx8
-else ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_2048)))
-CY_LINKER_SCRIPT_NAME=cy8c6xxa
-endif
-endif
-
-endif
+CY_STARTUP=$(call CY_MACRO_STARTUP_CALC,$(DEVICE))
+CY_LINKER_SCRIPT_NAME=$(call CY_MACRO_LINKER_CALC,$(DEVICE))
 
 ifeq ($(CY_LINKER_SCRIPT_NAME),)
 $(call CY_MACRO_ERROR,Could not resolve device series for linker script)
@@ -323,63 +335,22 @@ DEVICE_GEN?=$(DEVICE)
 
 # Core specifics
 CY_BSP_CM0P_SUFFIX=cm0plus
+CY_BSP_STARTUP_CM4_SUFFIX=cm4
 ifeq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_M0P)))
 CY_BSP_LINKERSCRIPT_CM4_SUFFIX=cm4
-CY_BSP_STARTUP_CM4_SUFFIX=cm4
+else
+ifneq (,$(findstring CYS06,$(DEVICE_GEN)))
+CY_BSP_LINKERSCRIPT_CM4_SUFFIX=cm4
 else
 CY_BSP_LINKERSCRIPT_CM4_SUFFIX=cm4_dual
-CY_BSP_STARTUP_CM4_SUFFIX=cm4
-endif
-
-# Architecture specifics
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)))
-CY_BSP_STARTUP=psoc6_01
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6A2M)))
-CY_BSP_STARTUP=psoc6_02
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6A512K)))
-CY_BSP_STARTUP=psoc6_03
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6A256K)))
-CY_BSP_STARTUP=psoc6_04
-endif
-
-# Linker scripts - Secure parts
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_SECURE)))
-
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)))
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_FLASH_KB_832)))
-CY_BSP_LINKER_SCRIPT=cyb06xx7
-endif
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6A2M)))
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_FLASH_KB_1856)))
-CY_BSP_LINKER_SCRIPT=cyb06xxa
 endif
 endif
 
-# Linker scripts - Non-secure parts
-else
+CY_BSP_STARTUP=$(call CY_MACRO_STARTUP_CALC,$(DEVICE_GEN))
+CY_BSP_LINKER_SCRIPT=$(call CY_MACRO_LINKER_CALC,$(DEVICE_GEN))
 
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6A256K)))
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_FLASH_KB_256)))
-CY_BSP_LINKER_SCRIPT=cy8c6xx4
-endif
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6A512K)))
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_FLASH_KB_512)))
-CY_BSP_LINKER_SCRIPT=cy8c6xx5
-endif
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)))
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_FLASH_KB_512)))
-CY_BSP_LINKER_SCRIPT=cy8c6xx6
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_FLASH_KB_1024)))
-CY_BSP_LINKER_SCRIPT=cy8c6xx7
-endif
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_DIE_PSOC6A2M)))
-ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_FLASH_KB_1024)))
-CY_BSP_LINKER_SCRIPT=cy8c6xx8
-else ifneq (,$(findstring $(DEVICE_GEN),$(CY_DEVICES_WITH_FLASH_KB_2048)))
-CY_BSP_LINKER_SCRIPT=cy8c6xxa
-endif
-endif
-
+ifeq ($(CY_BSP_LINKER_SCRIPT),)
+$(call CY_MACRO_ERROR,Could not resolve device series for linker script)
 endif
 
 CY_BSP_LINKER_SCRIPT_CM0P=$(CY_BSP_LINKER_SCRIPT)_$(CY_BSP_CM0P_SUFFIX)
