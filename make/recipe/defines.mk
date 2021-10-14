@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2020 Cypress Semiconductor Corporation
+# Copyright 2018-2021 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -326,6 +326,30 @@ CY_LINKER_SCRIPT_CM4=$(CY_LINKER_SCRIPT_NAME)_$(CY_LINKERSCRIPT_CM4_SUFFIX)
 CY_STARTUP_CM0P=$(CY_STARTUP)_$(CY_CM0P_SUFFIX)
 CY_STARTUP_CM4=$(CY_STARTUP)_$(CY_STARTUP_CM4_SUFFIX)
 
+#
+# QSPI
+#
+CY_MACRO_QSPI_CMSIS_CALC_INTERNAL=$(strip \
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A256K)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_256)),\
+	CY8C6xx4,),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A512K)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_512)),\
+	CY8C6xx5,),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6ABLE2)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_512)),\
+	CY8C6xx6,\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_1024)),\
+	CY8C6xx7,)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_DIE_PSOC6A2M)),\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_1024)),\
+	CY8C6xx8,\
+	$(if $(findstring $(1),$(CY_DEVICES_WITH_FLASH_KB_2048)),\
+	CY8C6xxA,)),)))))
+
+CY_QSPI_CMSIS_FLM_FILE_NAME=$(call CY_MACRO_QSPI_CMSIS_CALC_INTERNAL,$(DEVICE)).FLM
+
+CY_QSPI_IAR_FLM_FILE_NAME=$(if $(findstring $(DEVICE),$(CY_DEVICES_WITH_FLASH_KB_2048)),CY8C6xxA_SMIF,CY8C6xxx_SMIF).out
 
 ################################################################################
 # BSP generation
@@ -359,10 +383,12 @@ CY_BSP_STARTUP_CM0P=$(CY_BSP_STARTUP)_$(CY_BSP_CM0P_SUFFIX)
 CY_BSP_STARTUP_CM4=$(CY_BSP_STARTUP)_$(CY_BSP_STARTUP_CM4_SUFFIX)
 
 # Paths
-CY_BSP_TEMPLATES_DIR=$(call CY_MACRO_DIR,$(firstword $(CY_DEVICESUPPORT_SEARCH_PATH)))/devices/COMPONENT_CAT1A/templates/COMPONENT_MTB
+CY_BSP_TEMPLATES_DIR=$(CY_CONDITIONAL_DEVICESUPPORT_PATH)/devices/COMPONENT_CAT1A/templates/COMPONENT_MTB
 ifeq ($(wildcard $(CY_BSP_TEMPLATES_DIR)),)
-CY_BSP_TEMPLATES_DIR=$(call CY_MACRO_DIR,$(firstword $(CY_DEVICESUPPORT_SEARCH_PATH)))/devices/templates/COMPONENT_MTB
+CY_BSP_TEMPLATES_DIR=$(CY_CONDITIONAL_DEVICESUPPORT_PATH)/devices/templates/COMPONENT_MTB
 endif
+
+
 CY_TEMPLATES_DIR=$(CY_BSP_TEMPLATES_DIR)
 CY_BSP_DESTINATION_ABSOLUTE=$(abspath $(CY_TARGET_GEN_DIR))
 
@@ -372,38 +398,38 @@ endif
 
 # Command for searching files in the template directory
 CY_BSP_SEARCH_FILES_CMD=\
-	-name "system_psoc6*" \
-	-o -name "*$(CY_BSP_STARTUP_CM0P)\\.*" \
-	-o -name "*$(CY_BSP_STARTUP_CM4)\\.*" \
-	-o -name "*$(CY_BSP_LINKER_SCRIPT_CM0P)\\.*" \
-	-o -name "*$(CY_BSP_LINKER_SCRIPT_CM4)\\.*"
+	-name system_psoc6* \
+	-o -name *$(CY_BSP_STARTUP_CM0P)\.* \
+	-o -name *$(CY_BSP_STARTUP_CM4)\.* \
+	-o -name *$(CY_BSP_LINKER_SCRIPT_CM0P)\.* \
+	-o -name *$(CY_BSP_LINKER_SCRIPT_CM4)\.*
 
 
 CY_SEARCH_FILES_CMD=
 
 ifneq ($(CY_STARTUP_CM0P),$(CY_BSP_STARTUP_CM0P))
-CY_SEARCH_FILES_CMD+=-name "*$(CY_STARTUP_CM0P)\\.*"
+CY_SEARCH_FILES_CMD+=-name *$(CY_STARTUP_CM0P)\.*
 endif
 
 ifneq ($(CY_STARTUP_CM4),$(CY_BSP_STARTUP_CM4))
 ifneq ($(CY_SEARCH_FILES_CMD),)
 CY_SEARCH_FILES_CMD+=-o
 endif
-CY_SEARCH_FILES_CMD+=-name "*$(CY_STARTUP_CM4)\\.*"
+CY_SEARCH_FILES_CMD+=-name *$(CY_STARTUP_CM4)\.*
 endif
 
 ifneq ($(CY_LINKER_SCRIPT_CM0P),$(CY_BSP_LINKER_SCRIPT_CM0P))
 ifneq ($(CY_SEARCH_FILES_CMD),)
 CY_SEARCH_FILES_CMD+=-o
 endif
-CY_SEARCH_FILES_CMD+=-name "*$(CY_LINKER_SCRIPT_CM0P)\\.*"
+CY_SEARCH_FILES_CMD+=-name *$(CY_LINKER_SCRIPT_CM0P)\.*
 endif
 
 ifneq ($(CY_LINKER_SCRIPT_CM4),$(CY_BSP_LINKER_SCRIPT_CM4))
 ifneq ($(CY_SEARCH_FILES_CMD),)
 CY_SEARCH_FILES_CMD+=-o
 endif
-CY_SEARCH_FILES_CMD+=-name "*$(CY_LINKER_SCRIPT_CM4)\\.*"
+CY_SEARCH_FILES_CMD+=-name *$(CY_LINKER_SCRIPT_CM4)\.*
 endif
 
 ################################################################################
@@ -412,11 +438,12 @@ endif
 
 # Paths used in program/debug
 ifeq ($(CY_DEVICESUPPORT_PATH),)
-CY_OPENOCD_SVD_PATH?=
+CY_ECLIPSE_OPENOCD_SVD_PATH?=$$\{cy_prj_path\}/$(dir $(firstword $(CY_DEVICESUPPORT_SEARCH_PATH)))devices/COMPONENT_CAT1A/svd/$(CY_STARTUP).svd
+CY_VSCODE_OPENOCD_SVD_PATH?=$(dir $(firstword $(CY_DEVICESUPPORT_SEARCH_PATH)))devices/COMPONENT_CAT1A/svd/$(CY_STARTUP).svd
 else
-CY_OPENOCD_SVD_PATH?=
+CY_ECLIPSE_OPENOCD_SVD_PATH?=$$\{cy_prj_path\}/$(CY_DEVICESUPPORT_PATH)/devices/COMPONENT_CAT1A/svd/$(CY_STARTUP).svd
+CY_VSCODE_OPENOCD_SVD_PATH?=$(CY_DEVICESUPPORT_PATH)/devices/COMPONENT_CAT1A/svd/$(CY_STARTUP).svd
 endif
-
 
 ################################################################################
 # IDE specifics
@@ -489,8 +516,10 @@ endif
 # Expected format for Cypress multi core device is {MPN-name}{Core}.
 CY_IAR_DEVICE_NAME=$(DEVICE)$(CY_IAR_CORE_SUFFIX)
 
-# The architecture name is needed for the CPRJ and CPDSC
 CY_CMSIS_ARCH_NAME=PSoC6_DFP
+CY_CMSIS_VENDOR_NAME=Cypress
+CY_CMSIS_VENDOR_ID=19
+CY_CMSIS_SPECIFY_CORE=1
 
 ifeq ($(filter eclipse,$(MAKECMDGOALS)),eclipse)
 CY_ECLIPSE_ARGS+="s|&&CY_OPENOCD_SECOND_RESET&&|$(CY_OPENOCD_SECOND_RESET_TYPE)|g;"\
@@ -526,3 +555,8 @@ CY_SUPPORTED_TOOL_TYPES+=\
 	smartio-configurator\
 	dfuh-tool\
 	ml-configurator
+
+ifneq (,$(findstring $(DEVICE),$(CY_DEVICES_WITH_BLE)))
+CY_SUPPORTED_TOOL_TYPES+=bt-configurator
+CY_OPEN_bt_configurator_DEVICE=--device PSoC6
+endif

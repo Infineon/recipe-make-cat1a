@@ -1,5 +1,5 @@
 # PSoC 6 GNU make Build System Release Notes
-This repo provides the build recipe make files and scripts for building and programming PSoC 6 applications. Builds can be run either through a command-line interface (CLI) or through the ModusToolbox Integrated Development Environment (IDE).
+This repo provides the build recipe make files and scripts for building and programming PSoC 6 applications. Builds can be run either through a command-line interface (CLI) or through the Eclipse IDE for ModusToolbox.
 
 ### What's Included?
 The this release of the PSoC 6 GNU make build recipe includes complete support for building, programming, and debugging PSoC 6 application projects. It is expected that a code example contains a top level make file for itself and references a Board Support Package (BSP) that defines specifics items, like the PSoC 6 part, for the target board. Supported functionality includes the following:
@@ -17,6 +17,8 @@ The this release of the PSoC 6 GNU make build recipe includes complete support f
 This also includes the getlibs.bash script that can be used directly, or via the make target to download additional git repo based libraries for the application.
 
 ### What Changed?
+#### v1.9.0
+* Various minor improvements for path handling
 #### v1.8.0
 * Added support for cys06xxa linker script
 * Updated launch configs for PSoC6 256K devices
@@ -91,4 +93,4 @@ Use the following links for more information, as needed:
 * [ModusToolbox](https://www.cypress.com/products/modustoolbox-software-environment)
 
 ---
-© Cypress Semiconductor Corporation, 2019-2020.
+© Cypress Semiconductor Corporation, 2019-2021.

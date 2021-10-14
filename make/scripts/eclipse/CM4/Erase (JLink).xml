@@ -37,7 +37,7 @@
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.gdbServerTelnetPortNumber" value="2333"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.interfaceSpeed" value="auto"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.otherInitCommands" value=""/>
-<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.otherRunCommands" value="monitor reset 2&#13;&#10;monitor flash erase&#13;&#10;monitor reset 0&#13;&#10;quit"/>
+<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.otherRunCommands" value="monitor reset 0&#13;&#10;monitor flash erase&#13;&#10;monitor reset 0&#13;&#10;quit"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.secondResetType" value="2"/>
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.swoEnableTargetCpuFreq" value="0"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.swoEnableTargetPortMask" value="0x1"/>

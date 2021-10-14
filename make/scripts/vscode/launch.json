@@ -65,18 +65,15 @@
                 "stepi"//PSoC6 Only//
             ],
             "overrideRestartCommands": [
-                "monitor reset init",//PSoC6 Only//
-                "monitor reset run",//PSoC6 Only//
-                "monitor sleep 200",//PSoC6 Only//
-                "monitor psoc6 reset_halt sysresetreq"//PSoC6 Only//
+                "starti"//PSoC6 Only//
+                // For PSoC64 the 'starti' can not be used because target will halt in the FlashBoot //PSoC64 Only//
                 "start"//PSoC64 Only//
             ],
             "postRestartSessionCommands": [
-                "monitor gdb_sync",//PSoC6 Only//
-                "stepi"//PSoC6 Only//
             ],
             // svdFile is optional, it can be very large.
             "svdFile": "&&CY_SVD_FILE_NAME&&",
+            "breakAfterReset": true,
             "runToMain": true,          // if true, program will halt at main. Not used for a restart
             "preLaunchTask": "Build: Build [&&CY_CONFIG&&]",    // Set this to run a task from tasks.json
                                                         // before starting a debug session
@@ -105,23 +102,21 @@
             ],
             "overrideAttachCommands": [
                 "set mem inaccessible-by-default off",
-                "-enable-pretty-printing"
+                "-enable-pretty-printing",
+                "set remotetimeout 15"
             ],
             "numberOfProcessors": &&CY_PROCESSOR_COUNT&&,//PSoC6 Only//
             "targetProcessor": &&CY_TARGET_PROCESSOR_NUMBER&&,//PSoC6 Only//  // Set to 0 for the CM0+, set to 1 for the CM4
             "overrideRestartCommands": [
-                "monitor reset init",//PSoC6 Only//
-                "monitor reset run",//PSoC6 Only//
-                "monitor sleep 200",//PSoC6 Only//
-                "monitor psoc6 reset_halt sysresetreq"//PSoC6 Only//
+                "starti"//PSoC6 Only//
+                // For PSoC64 the 'starti' can not be used because target will halt in the FlashBoot //PSoC64 Only//
                 "start"//PSoC64 Only//
             ],
             "postRestartSessionCommands": [
-                "monitor gdb_sync",//PSoC6 Only//
-                "stepi"//PSoC6 Only//
             ],
             // svdFile is optional, it can be very large.
             "svdFile": "&&CY_SVD_FILE_NAME&&",
+            "breakAfterReset": true,
             "showDevDebugOutput": false // When set to true, displays output of GDB.
                                         // This is helpful when something is not working right
         },
@@ -143,6 +138,7 @@
                 "openocd.tcl"
             ],
             "overrideLaunchCommands": [
+                "set remotetimeout 15",
                 "monitor reset init",
                 "monitor psoc6 sflash_restrictions 1",
                 "monitor erase_all",
@@ -167,6 +163,7 @@
                 "openocd.tcl"
             ],
             "overrideLaunchCommands": [
+                "set remotetimeout 15",
                 "monitor psoc6 sflash_restrictions 1",
                 "monitor program {&&CY_HEX_FILE&&}",
                 "monitor reset_config srst_only",

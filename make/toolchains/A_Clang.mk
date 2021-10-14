@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2020 Cypress Semiconductor Corporation
+# Copyright 2018-2021 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -241,14 +241,16 @@ CY_TOOLCHAIN_EXPLICIT_DEPENDENCIES=-MMD -MP -MF "$$(subst .$(CY_TOOLCHAIN_SUFFIX
 #
 # Additional includes in the compilation process based on this
 # toolchain
-# NOTE: This includes support for the versions of GCC shipped with 2.0/2.1 and 2.2
+# NOTE: This includes support for the versions of GCC shipped with ModusToolbox 2.0-2.4
 #
 CY_TOOLCHAIN_INCLUDES=\
 	$(CY_COMPILER_GCC_ARM_DIR)/arm-none-eabi/include\
 	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/7.2.1/include\
 	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/7.2.1/include-fixed\
 	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/9.3.1/include\
-	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/9.3.1/include-fixed
+	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/9.3.1/include-fixed\
+	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/10.3.1/include\
+	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/10.3.1/include-fixed
 
 #
 # Additional libraries in the link process based on this toolchain
