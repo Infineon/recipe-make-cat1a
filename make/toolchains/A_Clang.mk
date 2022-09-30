@@ -28,122 +28,177 @@ endif
 
 
 ################################################################################
-# Macros
-################################################################################
-
-#
-# Run ELF2BIN conversion
-# $(1) : artifact elf
-# $(2) : artifact bin
-#
-CY_MACRO_ELF2BIN?=$(error Mach-O to bin not implemented. Cannot convert $1 to $2)
-
-
-################################################################################
 # Tools
 ################################################################################
 
-#
-# The base path to the Clang cross compilation executables
-#
-ifeq ($(CY_COMPILER_PATH),)
-CY_CROSSPATH=$(CY_COMPILER_A_Clang_DIR)
+# The base path to the ARM cross compilation executables
+ifneq ($(CY_COMPILER_A_Clang_DIR),)
+MTB_TOOLCHAIN_A_Clang__BASE_DIR:=$(CY_COMPILER_A_Clang_DIR)
 else
-CY_CROSSPATH=$(CY_COMPILER_PATH)
+ifneq ($(CY_COMPILER_PATH),)
+MTB_TOOLCHAIN_A_Clang__BASE_DIR:=$(CY_COMPILER_PATH)
+else
+MTB_TOOLCHAIN_A_Clang__BASE_DIR:=/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0
+endif
 endif
 
-#
-# Build tools
-#
-CC=clang
-CXX=$(CC)
-AS=$(CC)
-AR=libtool
-LD=ld
 
-#
+# The base path to the GCC cross compilation executables
+ifeq ($(CY_COMPILER_PATH),)
+MTB_TOOLCHAIN_A_Clang__BASE_DIR:=$(CY_COMPILER_A_Clang_DIR)
+else
+MTB_TOOLCHAIN_A_Clang__BASE_DIR:=$(CY_COMPILER_PATH)
+endif
+
+# The base path to the Clang cross compilation executables
+ifeq ($(TOOLCHAIN),A_Clang)
+CY_CROSSPATH:=$(MTB_TOOLCHAIN_A_Clang__BASE_DIR)
+endif
+
+# Build tools
+MTB_TOOLCHAIN_A_Clang__CC=clang
+MTB_TOOLCHAIN_A_Clang__CXX=$(CC)
+MTB_TOOLCHAIN_A_Clang__AS=$(CC)
+MTB_TOOLCHAIN_A_Clang__AR=libtool
+MTB_TOOLCHAIN_A_Clang__LD=ld
+
+
+################################################################################
+# Macros
+################################################################################
+
 # Elf to bin conversion tool
-#
-CY_TOOLCHAIN_ELF2BIN=
+MTB_TOOLCHAIN_A_Clang__ELF2BIN=
+
+# Run ELF2BIN conversion
+# $(1) : artifact elf
+# $(2) : artifact bin
+mtb_toolchain_A_Clang__elf2bin=$(error Mach-O to bin not implemented. Cannot convert $1 to $2)
 
 
 ################################################################################
 # Options
 ################################################################################
 
-#
 # DEBUG/NDEBUG selection
-#
 ifeq ($(CONFIG),Debug)
-CY_TOOLCHAIN_DEBUG_FLAG=-DDEBUG
-CY_TOOLCHAIN_OPTIMIZATION=-Og
+_MTB_TOOLCHAIN_A_Clang__DEBUG_FLAG=-DDEBUG
+_MTB_TOOLCHAIN_A_Clang__OPTIMIZATION=-Og
 else ifeq ($(CONFIG),Release)
-CY_TOOLCHAIN_DEBUG_FLAG=-DNDEBUG
-CY_TOOLCHAIN_OPTIMIZATION=-Os
+_MTB_TOOLCHAIN_A_Clang__DEBUG_FLAG=-DNDEBUG
+_MTB_TOOLCHAIN_A_Clang__OPTIMIZATION=-Os
 else
-CY_TOOLCHAIN_DEBUG_FLAG=
-CY_TOOLCHAIN_OPTIMIZATION=
+_MTB_TOOLCHAIN_A_Clang__DEBUG_FLAG=
+_MTB_TOOLCHAIN_A_Clang__OPTIMIZATION=
 endif
 
-#
 # Flags common to compile and link
-#
-CY_TOOLCHAIN_COMMON_FLAGS=\
+_MTB_TOOLCHAIN_A_Clang__COMMON_FLAGS=\
 	-mthumb\
 	-ffunction-sections\
 	-fdata-sections\
 	-g\
 	-Wall
 
-#
 # CPU core specifics
-#
-ifeq ($(CORE),CM0)
-CY_TOOLCHAIN_FLAGS_CORE=\
+ifeq ($(MTB_RECIPE__CORE),CM0)
+# Arm Cortex-M0 CPU
+_MTB_TOOLCHAIN_A_Clang__FLAGS_CORE=\
 	-arch armv6m\
 	-mcpu=cortex-m0\
 	--target=arm-none-macho
-CY_TOOLCHAIN_LDFLAGS_CORE=\
+
+_MTB_TOOLCHAIN_A_Clang__LDFLAGS_CORE=\
 	-arch armv6m\
 	-lclang_rt.soft_static
-CY_TOOLCHAIN_VFP_FLAGS=
-else ifeq ($(CORE),CM0P)
-CY_TOOLCHAIN_FLAGS_CORE=\
+
+_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS=
+endif
+
+ifeq ($(MTB_RECIPE__CORE),CM0P)
+# Arm Cortex-M0+ CPU
+_MTB_TOOLCHAIN_A_Clang__FLAGS_CORE=\
 	-arch armv6m\
 	-mcpu=cortex-m0plus\
 	--target=arm-none-macho
-CY_TOOLCHAIN_LDFLAGS_CORE=\
+
+_MTB_TOOLCHAIN_A_Clang__LDFLAGS_CORE=\
 	-arch armv6m\
 	-lclang_rt.soft_static
-CY_TOOLCHAIN_VFP_FLAGS=
-else ifeq ($(CORE),CM4)
+
+_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS=
+endif
+
+ifeq ($(MTB_RECIPE__CORE),CM4)
+# Arm Cortex-M4 CPU
 ifeq ($(VFP_SELECT),hardfp)
-CY_TOOLCHAIN_LD_VFP_FLAGS=-lclang_rt.hard_static
-CY_TOOLCHAIN_VFP_FLAGS=-mfloat-abi=hard -mfpu=fpv4-sp-d16
+_MTB_TOOLCHAIN_A_Clang__LD_VFP_FLAGS=-lclang_rt.hard_static
+_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS=-mfloat-abi=hard -mfpu=fpv4-sp-d16
 else
-CY_TOOLCHAIN_LD_VFP_FLAGS=-lclang_rt.soft_static
-CY_TOOLCHAIN_VFP_FLAGS=-mfloat-abi=softfp -mfpu=fpv4-sp-d16
+_MTB_TOOLCHAIN_A_Clang__LD_VFP_FLAGS=-lclang_rt.soft_static
+_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS=-mfloat-abi=softfp -mfpu=fpv4-sp-d16
 endif # ($(VFP_SELECT),hardfp)
-CY_TOOLCHAIN_FLAGS_CORE=\
+_MTB_TOOLCHAIN_A_Clang__FLAGS_CORE=\
 	-arch armv7em\
 	-mcpu=cortex-m4\
 	--target=armv7m-none-macho
-CY_TOOLCHAIN_LDFLAGS_CORE=\
-	-arch armv7em\
-	$(CY_TOOLCHAIN_LD_VFP_FLAGS)
-else ifeq ($(CORE),CM33)
-$(call CY_MACRO_ERROR, CPU core-specific flags are not defined for the "$(CORE)" CPU)
-endif # ($(CORE),CM0)
 
-#
+_MTB_TOOLCHAIN_A_Clang__LDFLAGS_CORE=\
+	-arch armv7em\
+	$(MTB_TOOLCHAIN_LD_VFP_FLAGS)
+endif
+
+ifeq ($(MTB_RECIPE__CORE),CM7)
+# Arm Cortex-M7 CPU
+ifeq ($(VFP_SELECT),hardfp)
+# Hardware fp
+_MTB_TOOLCHAIN_A_Clang__LD_VFP_FLAGS=-lclang_rt.hard_static
+ifeq ($(VFP_SELECT_PRECISION),singlefp)
+# FPv5 FPU, hardfp, single-precision
+_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS=-mfloat-abi=hard -mfpu=fpv5-sp-d16
+else
+# FPv5 FPU, hardfp, double-precision
+_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS=-mfloat-abi=hard -mfpu=fpv5-d16
+endif
+else
+# Software fp
+_MTB_TOOLCHAIN_A_Clang__LD_VFP_FLAGS=-lclang_rt.soft_static
+ifeq ($(VFP_SELECT_PRECISION),singlefp)
+# FPv5 FPU, softfp, single-precision
+_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
+else
+# FPv5 FPU, softfp, double-precision
+_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS=-mfloat-abi=softfp -mfpu=fpv5-d16
+endif
+endif # ($(VFP_SELECT),hardfp)
+_MTB_TOOLCHAIN_A_Clang__FLAGS_CORE=\
+	-arch armv7em\
+	-mcpu=cortex-m7\
+	--target=armv7m-none-macho
+_MTB_TOOLCHAIN_A_Clang__LDFLAGS_CORE=\
+	-arch armv7em\
+	$(MTB_TOOLCHAIN_LD_VFP_FLAGS)
+endif
+
+ifeq ($(TOOLCHAIN),A_Clang)
+ifeq ($(MTB_RECIPE__CORE),CM33)
+# Arm Cortex-M33 CPU
+$(call mtb__error, CPU core-specific flags are not defined for the "$(MTB_RECIPE__CORE)" CPU)
+endif
+
+ifeq ($(MTB_RECIPE__CORE),CM55)
+# Arm Cortex-M55 CPU
+$(call mtb__error, CPU core-specific flags are not defined for the "$(MTB_RECIPE__CORE)" CPU)
+endif
+endif
+
 # Command line flags for c-files
-#
-CY_TOOLCHAIN_CFLAGS=\
+MTB_TOOLCHAIN_A_Clang__CFLAGS=\
 	-c\
-	$(CY_TOOLCHAIN_FLAGS_CORE)\
-	$(CY_TOOLCHAIN_OPTIMIZATION)\
-	$(CY_TOOLCHAIN_VFP_FLAGS)\
-	$(CY_TOOLCHAIN_COMMON_FLAGS)\
+	$(_MTB_TOOLCHAIN_A_Clang__FLAGS_CORE)\
+	$(_MTB_TOOLCHAIN_A_Clang__OPTIMIZATION)\
+	$(_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS)\
+	$(_MTB_TOOLCHAIN_A_Clang__COMMON_FLAGS)\
 	--no-standard-includes\
 	-fasm-blocks\
 	-integrated-as\
@@ -155,19 +210,15 @@ CY_TOOLCHAIN_CFLAGS=\
 	-ffreestanding\
 	-mlong-calls
 
-#
 # Command line flags for cpp-files
-#
-CY_TOOLCHAIN_CXXFLAGS=$(CY_TOOLCHAIN_CFLAGS)
+MTB_TOOLCHAIN_A_Clang__CXXFLAGS=$(MTB_TOOLCHAIN_A_Clang__CFLAGS)
 
-#
 # Command line flags for s-files
-#
-CY_TOOLCHAIN_ASFLAGS=\
+MTB_TOOLCHAIN_A_Clang__ASFLAGS=\
 	-c\
-	$(CY_TOOLCHAIN_FLAGS_CORE)\
-	$(CY_TOOLCHAIN_VFP_FLAGS)\
-	$(CY_TOOLCHAIN_COMMON_FLAGS)\
+	$(_MTB_TOOLCHAIN_A_Clang__FLAGS_CORE)\
+	$(_MTB_TOOLCHAIN_A_Clang__VFP_FLAGS)\
+	$(_MTB_TOOLCHAIN_A_Clang__COMMON_FLAGS)\
 	-fasm-blocks\
 	-integrated-as\
 	-Wall\
@@ -178,12 +229,10 @@ CY_TOOLCHAIN_ASFLAGS=\
 	-ffreestanding\
 	-mlong-calls
 
-#
 # Command line flags for linking
-#
-CY_TOOLCHAIN_LDFLAGS=\
-	$(CY_TOOLCHAIN_LDFLAGS_CORE)\
-	$(CY_TOOLCHAIN_LD_VFP_FLAGS)\
+MTB_TOOLCHAIN_A_Clang__LDFLAGS=\
+	$(_MTB_TOOLCHAIN_A_Clang__LDFLAGS_CORE)\
+	$(_MTB_TOOLCHAIN_A_Clang__LD_VFP_FLAGS)\
 	-static\
 	-e Reset_Handler\
 	-merge_zero_fill_sections\
@@ -196,68 +245,59 @@ CY_TOOLCHAIN_LDFLAGS=\
 	-dead_strip_dylibs\
 	-no_branch_islands\
 	-no_zero_fill_sections\
-	-L$(CY_CROSSPATH)/lib/macho_embedded
+	-L$(MTB_TOOLCHAIN_A_Clang__BASE_DIR)/lib/macho_embedded
 
-#
 # Command line flags for archiving
-#
-CY_TOOLCHAIN_ARFLAGS=rvs
+MTB_TOOLCHAIN_A_Clang__ARFLAGS=rvs
 
-#
 # Toolchain-specific suffixes
-#
-CY_TOOLCHAIN_SUFFIX_S=S
-CY_TOOLCHAIN_SUFFIX_s=s
-CY_TOOLCHAIN_SUFFIX_C=c
-CY_TOOLCHAIN_SUFFIX_H=h
-CY_TOOLCHAIN_SUFFIX_CPP=cpp
-CY_TOOLCHAIN_SUFFIX_HPP=hpp
-CY_TOOLCHAIN_SUFFIX_O=o
-CY_TOOLCHAIN_SUFFIX_A=a
-CY_TOOLCHAIN_SUFFIX_D=d
-CY_TOOLCHAIN_SUFFIX_LS=mk
-CY_TOOLCHAIN_SUFFIX_MAP=map
-CY_TOOLCHAIN_SUFFIX_TARGET=mach_o
-CY_TOOLCHAIN_SUFFIX_PROGRAM=hex
-CY_TOOLCHAIN_SUFFIX_ARCHIVE=a
+MTB_TOOLCHAIN_A_Clang__SUFFIX_S  :=S
+MTB_TOOLCHAIN_A_Clang__SUFFIX_s  :=s
+MTB_TOOLCHAIN_A_Clang__SUFFIX_C  :=c
+MTB_TOOLCHAIN_A_Clang__SUFFIX_H  :=h
+MTB_TOOLCHAIN_A_Clang__SUFFIX_CPP:=cpp
+MTB_TOOLCHAIN_A_Clang__SUFFIX_CXX:=cxx
+MTB_TOOLCHAIN_A_Clang__SUFFIX_CC :=cc
+MTB_TOOLCHAIN_A_Clang__SUFFIX_HPP:=hpp
+MTB_TOOLCHAIN_A_Clang__SUFFIX_O  :=o
+MTB_TOOLCHAIN_A_Clang__SUFFIX_A  :=a
+MTB_TOOLCHAIN_A_Clang__SUFFIX_D  :=d
+MTB_TOOLCHAIN_A_Clang__SUFFIX_LS :=mk
+MTB_TOOLCHAIN_A_Clang__SUFFIX_MAP:=map
+MTB_TOOLCHAIN_A_Clang__SUFFIX_TARGET:=mach_o
+MTB_TOOLCHAIN_A_Clang__SUFFIX_PROGRAM:=hex
 
-#
 # Toolchain specific flags
-#
-CY_TOOLCHAIN_OUTPUT_OPTION=-o
-CY_TOOLCHAIN_ARCHIVE_LIB_OUTPUT_OPTION=-o
-CY_TOOLCHAIN_MAPFILE=-map 
-CY_TOOLCHAIN_LSFLAGS=
-CY_TOOLCHAIN_INCRSPFILE=@
-CY_TOOLCHAIN_INCRSPFILE_ASM=@
-CY_TOOLCHAIN_OBJRSPFILE=-filelist 
+MTB_TOOLCHAIN_A_Clang__OUTPUT_OPTION:=-o
+MTB_TOOLCHAIN_A_Clang__ARCHIVE_LIB_OUTPUT_OPTION:=-o
+MTB_TOOLCHAIN_A_Clang__MAPFILE:=-map 
+MTB_TOOLCHAIN_A_Clang__LSFLAGS:=
+MTB_TOOLCHAIN_A_Clang__INCRSPFILE:=@
+MTB_TOOLCHAIN_A_Clang__INCRSPFILE_ASM:=@
+MTB_TOOLCHAIN_A_Clang__OBJRSPFILE:=-filelist 
 
 #
 # Produce a makefile dependency rule for each input file
 #
-CY_TOOLCHAIN_DEPENDENCIES=-MMD -MP -MF "$(subst .$(CY_TOOLCHAIN_SUFFIX_O),.$(CY_TOOLCHAIN_SUFFIX_D),$@)" -MT "$@"
-CY_TOOLCHAIN_EXPLICIT_DEPENDENCIES=-MMD -MP -MF "$$(subst .$(CY_TOOLCHAIN_SUFFIX_O),.$(CY_TOOLCHAIN_SUFFIX_D),$$@)" -MT "$$@"
+MTB_TOOLCHAIN_A_Clang__DEPENDENCIES=-MMD -MP -MF "$(@:.$(MTB_TOOLCHAIN_A_Clang__SUFFIX_O)=.$(MTB_TOOLCHAIN_A_Clang__SUFFIX_D))" -MT "$@"
+MTB_TOOLCHAIN_A_Clang__EXPLICIT_DEPENDENCIES=-MMD -MP -MF "$$(@:.$(MTB_TOOLCHAIN_A_Clang__SUFFIX_O)=.$(MTB_TOOLCHAIN_A_Clang__SUFFIX_D))" -MT "$$@"
 
 #
 # Additional includes in the compilation process based on this
 # toolchain
 # NOTE: This includes support for the versions of GCC shipped with ModusToolbox 2.0-2.4
 #
-CY_TOOLCHAIN_INCLUDES=\
-	$(CY_COMPILER_GCC_ARM_DIR)/arm-none-eabi/include\
-	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/7.2.1/include\
-	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/7.2.1/include-fixed\
-	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/9.3.1/include\
-	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/9.3.1/include-fixed\
-	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/10.3.1/include\
-	$(CY_COMPILER_GCC_ARM_DIR)/lib/gcc/arm-none-eabi/10.3.1/include-fixed
+MTB_TOOLCHAIN_A_Clang__INCLUDES:=\
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/arm-none-eabi/include\
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/7.2.1/include\
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/7.2.1/include-fixed\
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/9.3.1/include\
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/9.3.1/include-fixed\
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/10.3.1/include\
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/10.3.1/include-fixed
 
 #
 # Additional libraries in the link process based on this toolchain
 #
-CY_TOOLCHAIN_DEFINES=
+MTB_TOOLCHAIN_A_Clang__DEFINES:=$(_MTB_TOOLCHAIN_A_Clang__DEBUG_FLAG)
 
-#
-# M2BIN tool is used to convert Mach-O to binary
-#
-CY_TOOLCHAIN_M2BIN=$(CY_BASELIB_PATH)/make/scripts/m2bin

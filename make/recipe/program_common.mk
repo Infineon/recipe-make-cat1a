@@ -26,40 +26,54 @@ ifeq ($(WHICHFILE),true)
 $(info Processing $(lastword $(MAKEFILE_LIST)))
 endif
 
-CY_GDB_CLIENT=$(CY_INTERNAL_TOOL_arm-none-eabi-gdb_EXE)
-CY_OPENOCD_EXE=$(CY_INTERNAL_TOOL_openocd_EXE)
-CY_OPENOCD_SCRIPTS=-s $(CY_INTERNAL_TOOL_openocd_scripts_SCRIPT)
+_MTB_RECIPE__OPENOCD_SCRIPTS=-s $(CY_TOOL_openocd_scripts_SCRIPT_ABS)
 
-CY_OPENOCD_INTERFACE=source [find interface/kitprog3.cfg];
-CY_OPENOCD_TARGET=source [find target/$(CY_OPENOCD_DEVICE_CFG)];
-ifeq ($(CY_OPENOCD_QSPI_CFG_PATH),)
-CY_OPENOCD_QSPI=
+_MTB_RECIPE__OPENOCD_INTERFACE=source [find interface/kitprog3.cfg];
+_MTB_RECIPE__OPENOCD_TARGET=source [find target/$(_MTB_RECIPE__OPENOCD_DEVICE_CFG)];
+ifeq ($(_MTB_RECIPE__OPENOCD_QSPI_CFG_PATH),)
+_MTB_RECIPE__OPENOCD_QSPI=
 else
-CY_OPENOCD_QSPI=-s $(CY_OPENOCD_QSPI_CFG_PATH)
+_MTB_RECIPE__OPENOCD_QSPI=-s $(_MTB_RECIPE__OPENOCD_QSPI_CFG_PATH)
 endif
 
 erase:
-	$(CY_NOISE)echo;\
+	$(MTB__NOISE)echo;\
 	echo "Erasing target device... ";\
-	$(CY_OPENOCD_EXE) $(CY_OPENOCD_ERASE_ARGS)
+	$(CY_TOOL_openocd_EXE_ABS) $(_MTB_RECIPE__OPENOCD_ERASE_ARGS)
 
-program: build qprogram
+ifeq ($(MTB_CORE__APPLICATION_BOOTSTRAP),true)
+# Multi-core application: pass project-specific program target to the application level
+program_application_bootstrap:
+	$(MTB__NOISE)$(MAKE) -C .. program
 
-qprogram: memcalc
-ifeq ($(LIBNAME),)
-	$(CY_NOISE)echo;\
-	echo "Programming target device... ";\
-	$(CY_OPENOCD_EXE) $(CY_OPENOCD_PROGRAM_ARGS)
+qprogram_application_bootstrap:
+	$(MTB__NOISE)$(MAKE) -C .. qprogram
+
+program: program_application_bootstrap
+qprogram: qprogram_application_bootstrap
 else
-	$(CY_NOISE)echo "Library application detected. Skip programming... ";\
+# Single-core application: program project image directly
+program: program_proj
+qprogram: qprogram_proj
+endif
+
+program_proj: build_proj qprogram_proj
+
+qprogram_proj: memcalc
+ifeq ($(LIBNAME),)
+	$(MTB__NOISE)echo;\
+	echo "Programming target device... ";\
+	$(CY_TOOL_openocd_EXE_ABS) $(_MTB_RECIPE__OPENOCD_PROGRAM_ARGS)
+else
+	$(MTB__NOISE)echo "Library application detected. Skip programming... ";\
 	echo
 endif
 
-debug: program qdebug
+debug: program_proj qdebug
 
-qdebug: qprogram
+qdebug: qprogram_proj
 ifeq ($(LIBNAME),)
-	$(CY_NOISE)echo;\
+	$(MTB__NOISE)echo;\
 	echo ==============================================================================;\
 	echo "Instruction:";\
 	echo "Open a separate shell and run the attach target (make attach)";\
@@ -67,16 +81,17 @@ ifeq ($(LIBNAME),)
 	echo ==============================================================================;\
 	echo;\
 	echo "Opening GDB port ... ";\
-	$(CY_OPENOCD_EXE) $(CY_OPENOCD_DEBUG_ARGS)
+	$(CY_TOOL_openocd_EXE_ABS) $(_MTB_RECIPE__OPENOCD_DEBUG_ARGS)
 else
-	$(CY_NOISE)echo "Library application detected. Skip debug... ";\
+	$(MTB__NOISE)echo "Library application detected. Skip debug... ";\
 	echo
 endif
 
 attach:
-	$(CY_NOISE)echo;\
+	$(MTB__NOISE)echo;\
 	echo "Starting GDB Client... ";\
-	$(CY_GDB_CLIENT) $(CY_OPENOCD_SYMBOL_IMG) -x $(CY_GDB_ARGS)
+	$(MTB_TOOLCHAIN_GCC_ARM__GDB) $(_MTB_RECIPE__OPENOCD_SYMBOL_IMG) -x $(_MTB_RECIPE__GDB_ARGS)
 
 
-.PHONY: erase program qprogram debug qdebug attach
+.PHONY: erase program program_application_bootstrap program_proj
+.PHONY: qprogram qprogram_application_bootstrap qprogram_proj debug qdebug attach
