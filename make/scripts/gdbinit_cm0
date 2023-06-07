@@ -1,5 +1,5 @@
 # CM0 port
-target remote:3332
+target remote:3333
 
 # Open all memory
 set mem inaccessible-by-default off

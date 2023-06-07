@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2021 Cypress Semiconductor Corporation
+# Copyright 2018-2023 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -113,11 +113,6 @@ _MTB_TOOLCHAIN_GCC_ARM__COMMON_FLAGS:=\
 	-Wall\
 	-pipe
 
-#
-# NOTE: The official NewLib Nano build leaks file buffers when used with reentrant support.
-# The ModusToolbox 2.2+ installer bundles a version that fixes this leak that has not yet been
-# accepted upstream.
-#
 _MTB_TOOLCHAIN_GCC_ARM__NEWLIBNANO:=--specs=nano.specs
 
 #
@@ -176,7 +171,17 @@ endif
 endif
 
 ifeq ($(MTB_RECIPE__CORE),CM33)
-_MTB_TOOLCHAIN_GCC_ARM__FLAGS_CORE:=-mcpu=cortex-m33+nodsp $(_MTB_TOOLCHAIN_GCC_ARM__NEWLIBNANO)
+ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_DSP_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)),)
+_MTB_TOOLCHAIN_GCC_ARM__DSP_FLAG_SUFFIX=+nodsp
+else
+_MTB_TOOLCHAIN_GCC_ARM__DSP_FLAG_SUFFIX=
+endif
+# Arm Cortex-M33 CPU
+_MTB_TOOLCHAIN_GCC_ARM__FLAGS_CORE:=-mcpu=cortex-m33$(_MTB_TOOLCHAIN_GCC_ARM__DSP_FLAG_SUFFIX) $(_MTB_TOOLCHAIN_GCC_ARM__NEWLIBNANO)
+ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_FPU_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)),)
+# Software FP
+_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS=
+else
 ifeq ($(VFP_SELECT),hardfp)
 # FPv5 FPU, hardfp, single-precision only
 _MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-sp-d16
@@ -188,10 +193,50 @@ else
 _MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
 endif
 endif
+endif
 
 ifeq ($(MTB_RECIPE__CORE),CM55)
-# Arm Cortex-M55 CPU
-_MTB_TOOLCHAIN_GCC_ARM__FLAGS_CORE:=-mcpu=cortex-m55 $(_MTB_TOOLCHAIN_GCC_ARM__NEWLIBNANO)
+# Check if MVE is supported
+ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_MVE_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)),)
+ifneq ($(MVE_SELECT),NO_MVE)
+$(call mtb__error, "MVE_SELECT=$(MVE_SELECT)" but "$(MTB_RECIPE__CORE)" core does not support MVE. Set "MVE_SELECT=NO_MVE" to disable MVE support for "$(MTB_RECIPE__CORE)" core.)
+endif
+endif
+ifeq ($(MVE_SELECT),NO_MVE)
+# Disable MVE
+_MTB_TOOLCHAIN_GCC_ARM__MVE_FLAGS=+nomve
+else ifeq ($(MVE_SELECT),MVE-I)
+ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_FPU_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)),)
+# Force switch to softfloat mode if FPU is not available
+_MTB_TOOLCHAIN_GCC_ARM__MVE_FLAGS=+nofp
+else
+ifeq ($(VFP_SELECT),softfloat)
+# Enable MVE-I and disable FPU
+_MTB_TOOLCHAIN_GCC_ARM__MVE_FLAGS=+nofp
+else
+# Integer precision MVE
+_MTB_TOOLCHAIN_GCC_ARM__MVE_FLAGS=+nomve.fp
+endif
+endif
+else 
+ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_FPU_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)),)
+$(info INFO: MVE_SELECT=MVE-F is set but FPU is not available on $(MTB_RECIPE__CORE) core. Valid options for $(MTB_RECIPE__CORE) core are MVE_SELECT=MVE-I or MVE_SELECT=NO_MVE.)
+else ifeq ($(VFP_SELECT),softfloat)
+$(info INFO: MVE_SELECT=MVE-F is set but VFP_SELECT=softfloat. Set VFP_SELECT=softfp or VFP_SELECT=hardfp to enable MVE-F support.)
+endif
+# Integer, half-, and single-precision floating-point MVE
+_MTB_TOOLCHAIN_GCC_ARM__MVE_FLAGS=
+endif
+# Arm Cortex-M55 CPU + extensions
+_MTB_TOOLCHAIN_GCC_ARM__FLAGS_CORE:=-mcpu=cortex-m55$(_MTB_TOOLCHAIN_GCC_ARM__MVE_FLAGS) $(_MTB_TOOLCHAIN_GCC_ARM__NEWLIBNANO)
+ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_FPU_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)),)
+# Software FP
+ifeq ($(MVE_SELECT),MVE-I)
+_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS=-mfloat-abi=hard -mfpu=auto
+else
+_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS=
+endif
+else
 ifeq ($(VFP_SELECT),hardfp)
 ifeq ($(VFP_SELECT_PRECISION),singlefp)
 # FPv5 FPU, hardfp, single-precision
@@ -202,7 +247,11 @@ _MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-d16
 endif
 else ifeq ($(VFP_SELECT),softfloat)
 # Software FP
+ifeq ($(MVE_SELECT),MVE-I)
+_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS=-mfloat-abi=hard -mfpu=auto
+else
 _MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS=
+endif
 else
 ifeq ($(VFP_SELECT_PRECISION),singlefp)
 # FPv5 FPU, softfp, single-precision
@@ -210,6 +259,7 @@ _MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
 else
 # FPv5 FPU, softfp, double-precision
 _MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-d16
+endif
 endif
 endif
 endif
@@ -283,3 +333,5 @@ MTB_TOOLCHAIN_GCC_ARM__INCLUDES:=
 # TODO: Set MTB_RECIPE__xyzzy, replace MTB_TOOLCHAIN_xyzzy with recipe's var
 # Additional libraries in the link process based on this toolchain
 MTB_TOOLCHAIN_GCC_ARM__DEFINES:=$(_MTB_TOOLCHAIN_GCC_ARM__DEBUG_FLAG)
+
+MTB_TOOLCHAIN_GCC_ARM__VSCODE_INTELLISENSE_MODE:=gcc-arm

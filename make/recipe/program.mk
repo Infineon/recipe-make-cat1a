@@ -7,7 +7,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2021 Cypress Semiconductor Corporation
+# Copyright 2018-2023 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,11 @@ endif
 
 include $(MTB_TOOLS__RECIPE_DIR)/make/recipe/program_common.mk
 
-_MTB_RECIPE__GDB_ARGS=$(MTB_TOOLS__RECIPE_DIR)/make/scripts/$(_MTB_RECIPE__GDBINIT_FILE)
+ifeq ($(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR), JLink)
+_MTB_RECIPE__GDB_ARGS=$(MTB_TOOLS__RECIPE_DIR)/make/scripts/$(_MTB_RECIPE__JLINK_GDBINIT_FILE)
+else
+_MTB_RECIPE__GDB_ARGS=$(MTB_TOOLS__RECIPE_DIR)/make/scripts/$(_MTB_RECIPE__OPENOCD_GDBINIT_FILE)
+endif
 
 ifeq ($(TOOLCHAIN),A_Clang)
 _MTB_RECIPE__OPENOCD_PROGRAM_IMG=$(MTB_TOOLS__OUTPUT_CONFIG_DIR)/$(APPNAME).bin $(TOOLCHAIN_VECT_BASE_CM4)
@@ -62,3 +66,5 @@ _MTB_RECIPE__OPENOCD_PROGRAM_ARGS=$(_MTB_RECIPE__OPENOCD_SCRIPTS) $(_MTB_RECIPE_
 					"$(_MTB_RECIPE__OPENOCD_INTERFACE) $(_MTB_RECIPE__OPENOCD_CM0_DISABLE_FLAG); $(_MTB_RECIPE__OPENOCD_TARGET) $(_MTB_RECIPE__OPENOCD_CUSTOM_COMMAND) $(_MTB_RECIPE__OPENOCD_PROGRAM)"
 _MTB_RECIPE__OPENOCD_DEBUG_ARGS=$(_MTB_RECIPE__OPENOCD_SCRIPTS) $(_MTB_RECIPE__OPENOCD_QSPI) -c \
 					"$(_MTB_RECIPE__OPENOCD_INTERFACE) $(_MTB_RECIPE__OPENOCD_CM0_DISABLE_FLAG); $(_MTB_RECIPE__OPENOCD_TARGET) $(_MTB_RECIPE__OPENOCD_CUSTOM_COMMAND) $(_MTB_RECIPE__OPENOCD_DEBUG)"
+
+_MTB_RECIPE__JLINK_DEBUG_ARGS=-if swd -device $(_MTB_RECIPE__JLINK_DEVICE_CFG_DEBUG) -endian little -speed auto -port 2331 -swoport 2332 -telnetport 2333 -vd -ir -localhostonly 1 -singlerun -strict -timeout 0 -nogui

@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2021 Cypress Semiconductor Corporation
+# Copyright 2018-2023 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -293,11 +293,12 @@ MTB_TOOLCHAIN_A_Clang__INCLUDES:=\
 	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/7.2.1/include-fixed\
 	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/9.3.1/include\
 	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/9.3.1/include-fixed\
-	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/10.3.1/include\
-	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/10.3.1/include-fixed
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/11.3.1/include\
+	$(MTB_TOOLCHAIN_GCC_ARM__BASE_DIR)/lib/gcc/arm-none-eabi/11.3.1/include-fixed
 
 #
 # Additional libraries in the link process based on this toolchain
 #
 MTB_TOOLCHAIN_A_Clang__DEFINES:=$(_MTB_TOOLCHAIN_A_Clang__DEBUG_FLAG)
 
+MTB_TOOLCHAIN_GCC_ARM__VSCODE_INTELLISENSE_MODE:=gcc-arm

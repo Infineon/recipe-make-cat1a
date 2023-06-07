@@ -1,0 +1,309 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    //
+    // NOTE for JLink users:
+    //
+    //    Please create the following setting in your VSCode User Settings or in
+    //    your global PATH.  Cortex-Debug needs to find the specific gdb-server
+    //    you want to use.
+    //
+    //       Windows     : "cortex-debug.JLinkGDBServerPath": "<JLinkInstallDir>/JLinkGDBServerCL"
+    //       Linux / Mac : "cortex-debug.JLinkGDBServerPath": "<JLinkInstallDir>/JLinkGDBServer"
+    //
+    //    User settings are located in:
+    //
+    //       Windows : %APPDATA%/Code/User/settings.json
+    //       Mac     : $HOME/Library/Application Support/Code/User/settings.json
+    //       Linux   : $HOME/.config/Code/User/settings.json
+    //
+    //    You can use the VSCode Settings UI to edit the files mentioned above.
+    //
+    //    For the JLink configurations in this file, the "device" name comes from
+    //    the list found here:
+    //       https://www.segger.com/downloads/supported-devices.php
+    //
+    //    To use KitProg3/MiniProg4 JTAG interface, update transport in openocd.tcl located at the
+    //    project root - find "transport select [swd|jtag]" and specify the appropriate interface.
+    //    To use JLink JTAG interface, update corresponding JLink configuration. Set "interface"
+    //    property to "jtag" and delete the "_tm" suffix (if present) in the "device" property.
+    //
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch PSoC6 &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (KitProg3_MiniProg4)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "openocd",
+            "searchDir": [
+                "${workspaceFolder}",
+                "${config:modustoolbox.toolsPath}/&&_MTB_RECIPE__OPENOCD_SCRIPTS_DIR_RELATIVE&&/",
+                "&&_MTB_RECIPE__QSPI_CFG_PATH&&"
+            ],
+            "configFiles": [
+                "openocd.tcl"
+            ],
+            "overrideLaunchCommands": [
+                "set mem inaccessible-by-default off",
+                "-enable-pretty-printing",
+                "set remotetimeout 15",
+                // Comment this next line out if you don't want to reload program
+                "monitor program {&&_MTB_RECIPE__HEX_FILE&&}",
+                "monitor reset run",//PSoC6 Only//
+                "monitor psoc6 reset_halt sysresetreq"//PSoC6 Only//
+                "monitor reset init"//PSoC64 Only//
+            ],
+            "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,//PSoC6 Only//
+            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER&&,//PSoC6 Only//  // Set to 0 for the CM0+, set to 1 for the CM4
+            "postStartSessionCommands": [       
+                // Needed if runToMain is false //PSoC6 Only//
+                // Following two commands are needed to get gdb and openocd and HW all in sync. //PSoC6 Only//
+                // Or, execution context (PC, stack, registers, etc.) look like they are from before reset. //PSoC6 Only//
+                // The stepi, is a pretend instruction that does not actually do a stepi, but MUST be done //PSoC6 Only//
+                // Its a documented workaround in openocd. Do a 'monitor help' to see more info //PSoC6 Only//
+                // //PSoC6 Only//
+                // An alternative command to use is "continue" instead of the following two //PSoC6 Only//
+                "monitor gdb_sync",//PSoC6 Only//
+                "stepi"//PSoC6 Only//
+            ],
+            "overrideRestartCommands": [
+                "starti"
+            ],
+            "postRestartSessionCommands": [
+            ],
+            // svdFile is optional, it can be very large.
+            "svdFile": "&&_MTB_RECIPE__SVD_FILE_NAME&&",
+            "breakAfterReset": true,
+            "runToEntryPoint": "main",  // Specifies application entry point name where program will halt
+            "preLaunchTask": "Build",    // Set this to run a task from tasks.json
+                                                        // before starting a debug session
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        },
+        // When using 'attach', make sure your program is running on the board and that your
+        // executable matches the image in the chip exactly, or else strange things can happen
+        // with breakpoints, variables, etc.
+        {
+            "name": "Attach PSoC6 &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (KitProg3_MiniProg4)",
+            "type": "cortex-debug",
+            "request": "attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "&&_MTB_RECIPE__ATTACH_SERVER_TYPE&&",
+            "searchDir": [
+                "${workspaceFolder}",
+                "${config:modustoolbox.toolsPath}/&&_MTB_RECIPE__OPENOCD_SCRIPTS_DIR_RELATIVE&&/"
+            ],
+            "openOCDPreConfigLaunchCommands": [
+                "set ENABLE_ACQUIRE 0"
+            ],
+            "configFiles": [
+                "openocd.tcl"
+            ],
+            "overrideAttachCommands": [
+                "set mem inaccessible-by-default off",
+                "-enable-pretty-printing",
+                "set remotetimeout 15",
+                "info threads"
+            ],
+            "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,//PSoC6 Only//
+            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER&&,//PSoC6 Only//  // Set to 0 for the CM0+, set to 1 for the CM4
+            "overrideRestartCommands": [
+                "starti"
+            ],
+            "postRestartSessionCommands": [
+            ],
+            // svdFile is optional, it can be very large.
+            "svdFile": "&&_MTB_RECIPE__SVD_FILE_NAME&&",
+            "breakAfterReset": true,
+            "runToEntryPoint": "main",    // Specifies application entry point name for restart/reset
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        },
+        {//Except multi-core start//
+            "name": "Erase (KitProg3_MiniProg4)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "openocd",
+            "searchDir": [
+                "${workspaceFolder}",
+                "${config:modustoolbox.toolsPath}/&&_MTB_RECIPE__OPENOCD_SCRIPTS_DIR_RELATIVE&&/"
+            ],
+            "openOCDPreConfigLaunchCommands": [
+                "set DISABLE_SMIF 1"
+            ],
+            "configFiles": [
+                "openocd.tcl"
+            ],
+            "overrideLaunchCommands": [
+                "set remotetimeout 15",
+                "monitor reset init",
+                "monitor psoc6 sflash_restrictions 1",
+                "monitor erase_all"
+            ],
+            "postStartSessionCommands": [
+                "quit"
+            ],
+            "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,//PSoC6 Only//
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        },
+        {
+            "name": "Program (KitProg3_MiniProg4)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "openocd",
+            "searchDir": [
+                "${workspaceFolder}",
+                "${config:modustoolbox.toolsPath}/&&_MTB_RECIPE__OPENOCD_SCRIPTS_DIR_RELATIVE&&/",
+                "&&_MTB_RECIPE__QSPI_CFG_PATH&&"
+            ],
+            "configFiles": [
+                "openocd.tcl"
+            ],
+            "overrideLaunchCommands": [
+                "set remotetimeout 15",
+                "monitor psoc6 sflash_restrictions 1",
+                "monitor program {&&_MTB_RECIPE__HEX_FILE&&}",
+                "monitor reset_config srst_only",
+                "monitor reset run",
+                "monitor &&_MTB_RECIPE__OPENOCD_CHIP&&.dap dpreg 0x04 0x00"
+            ],
+            "postStartSessionCommands": [
+                "quit"
+            ],
+            "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,//PSoC6 Only//
+            "preLaunchTask": "Build",    // Set this to run a task from tasks.json
+                                                        // before device programming
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        },//Except multi-core end//
+        {
+            "name": "Launch PSoC6 &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (JLink)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "jlink",
+            "device": "&&_MTB_RECIPE__DEVICE_DEBUG&&",
+            "interface": "swd",
+            "preLaunchCommands": [
+                // Program via the hex file to get complete coverage
+                "exec-file &&_MTB_RECIPE__HEX_FILE&&"
+            ],
+            "overrideRestartCommands": [
+                "starti"
+            ],
+            // svdFile is optional, it can be very large.
+            "svdFile": "&&_MTB_RECIPE__SVD_FILE_NAME&&",
+            "breakAfterReset": true,
+            "runToEntryPoint": "main",  // Specifies application entry point name where program will halt
+            "preLaunchTask": "Build", // Set this to run a task from tasks.json before
+                                                     // starting a debug session
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        },
+        // When using 'attach', make sure your program is running on the board and that your
+        // executable matches the image in the chip exactly, or else strange things can happen
+        // with breakpoints, variables, etc.
+        {
+            "name": "Attach PSoC6 &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (JLink)",
+            "type": "cortex-debug",
+            "request": "attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "jlink",
+            "device": "&&_MTB_RECIPE__DEVICE_ATTACH&&",
+            "interface": "swd",
+            "overrideRestartCommands": [
+                "starti"
+            ],
+            // svdFile is optional, it can be very large.
+            "svdFile": "&&_MTB_RECIPE__SVD_FILE_NAME&&",
+            "breakAfterReset": true,
+            "runToEntryPoint": "main",    // Specifies application entry point name for restart/reset
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        },
+        {//Except multi-core start//
+            "name": "Erase (JLink)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            // executable not needed but need some valid file to get the session to start
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "jlink",
+            "device": "&&_MTB_RECIPE__DEVICE_PROGRAM&&",
+            "interface": "swd",
+            "overrideLaunchCommands": [
+                "monitor reset 0",      // Reset both core and the peripherals
+                "monitor flash erase",
+                "monitor reset 2"       // Reset via the reset pin
+            ],
+            "postStartSessionCommands": [
+                "quit"
+            ],
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        },
+        {
+            "name": "Program (JLink)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            // executable not needed but need some valid file to get the session to start
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "jlink",
+            "device": "&&_MTB_RECIPE__DEVICE_PROGRAM&&",
+            "interface": "swd",
+            "preLaunchCommands": [
+                // Program via the hex file to get complete coverage
+                "exec-file &&_MTB_RECIPE__HEX_FILE&&"
+            ],
+            "overrideLaunchCommands": [
+                "monitor reset 0",      // Reset both core and the peripherals
+                "-target-download",
+                "monitor reset 2",      // Reset via the reset pin
+                "monitor go"
+            ],
+            "postStartSessionCommands": [
+                "quit"
+            ],
+            "preLaunchTask": "Build",    // Set this to run a task from tasks.json
+                                                        // before device programming
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        }//Except multi-core end//
+    ]
+}

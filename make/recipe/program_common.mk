@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2021 Cypress Semiconductor Corporation
+# Copyright 2018-2023 Cypress Semiconductor Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,10 +36,34 @@ else
 _MTB_RECIPE__OPENOCD_QSPI=-s $(_MTB_RECIPE__OPENOCD_QSPI_CFG_PATH)
 endif
 
-erase:
+ifeq ($(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR), JLink)
+_MTB_RECIPE__GDB_SERVER=$(MTB_CORE__JLINK_GDB_EXE)
+_MTB_RECIPE__PROGRAM_ERASE_TOOL=$(MTB_CORE__JLINK_EXE)
+_MTB_RECIPE__ERASE_ARGS=-AutoConnect 1 -ExitOnError 1 -NoGui 1 -Device $(_MTB_RECIPE__JLINK_DEVICE_CFG_PROGRAM) -If SWD -Speed auto -CommandFile $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
+_MTB_RECIPE__PROGRAM_ARGS=-AutoConnect 1 -ExitOnError 1 -NoGui 1 -Device $(_MTB_RECIPE__JLINK_DEVICE_CFG_PROGRAM) -If SWD -Speed auto -CommandFile $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
+_MTB_RECIPE__DEBUG_ARGS=$(_MTB_RECIPE__JLINK_DEBUG_ARGS)
+else
+_MTB_RECIPE__GDB_SERVER=$(CY_TOOL_openocd_EXE_ABS)
+_MTB_RECIPE__PROGRAM_ERASE_TOOL=$(CY_TOOL_openocd_EXE_ABS)
+_MTB_RECIPE__ERASE_ARGS=$(_MTB_RECIPE__OPENOCD_ERASE_ARGS)
+_MTB_RECIPE__PROGRAM_ARGS=$(_MTB_RECIPE__OPENOCD_PROGRAM_ARGS)
+_MTB_RECIPE__DEBUG_ARGS=$(_MTB_RECIPE__OPENOCD_DEBUG_ARGS)
+endif
+
+# Generate command files required by JLink tool for programming/erasing
+jlink_generate:
+	sed "s|&&PROG_FILE&&|$(_MTB_RECIPE__OPENOCD_PROGRAM_IMG)|g;" $(MTB_TOOLS__RECIPE_DIR)/make/scripts/program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
+	sed "s|&&ERASE_OPTION&&|$(_MTB_RECIPE_JLINK_CMDFILE_ERASE)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_program.jlink
+	mv -f $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_program.jlink $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
+	cp $(MTB_TOOLS__RECIPE_DIR)/make/scripts/erase.jlink $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
+
+# depends on $(_MTB_CORE__QBUILD_MK_FILE) to locate flash loaders
+erase: $(_MTB_CORE__QBUILD_MK_FILE) erase_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
+
+erase_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR): debug_interface_check
 	$(MTB__NOISE)echo;\
 	echo "Erasing target device... ";\
-	$(CY_TOOL_openocd_EXE_ABS) $(_MTB_RECIPE__OPENOCD_ERASE_ARGS)
+	"$(_MTB_RECIPE__PROGRAM_ERASE_TOOL)" $(_MTB_RECIPE__ERASE_ARGS)
 
 ifeq ($(MTB_CORE__APPLICATION_BOOTSTRAP),true)
 # Multi-core application: pass project-specific program target to the application level
@@ -57,21 +81,28 @@ program: program_proj
 qprogram: qprogram_proj
 endif
 
-program_proj: build_proj qprogram_proj
+program_proj: program_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
 
-qprogram_proj: memcalc
+program_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR): build_proj memcalc
+
+program_JLink: jlink_generate
+erase_JLink: jlink_generate
+
+qprogram_proj: qprogram_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
+
+# depends on $(_MTB_CORE__QBUILD_MK_FILE) to locate flash loaders
+program_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR) qprogram_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR): $(_MTB_CORE__QBUILD_MK_FILE) debug_interface_check
 ifeq ($(LIBNAME),)
 	$(MTB__NOISE)echo;\
-	echo "Programming target device... ";\
-	$(CY_TOOL_openocd_EXE_ABS) $(_MTB_RECIPE__OPENOCD_PROGRAM_ARGS)
+	"$(_MTB_RECIPE__PROGRAM_ERASE_TOOL)" $(_MTB_RECIPE__PROGRAM_ARGS)
 else
 	$(MTB__NOISE)echo "Library application detected. Skip programming... ";\
 	echo
 endif
 
-debug: program_proj qdebug
+debug: program_proj qdebug_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
 
-qdebug: qprogram_proj
+qdebug qdebug_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR): qprogram_proj debug_interface_check
 ifeq ($(LIBNAME),)
 	$(MTB__NOISE)echo;\
 	echo ==============================================================================;\
@@ -81,13 +112,13 @@ ifeq ($(LIBNAME),)
 	echo ==============================================================================;\
 	echo;\
 	echo "Opening GDB port ... ";\
-	$(CY_TOOL_openocd_EXE_ABS) $(_MTB_RECIPE__OPENOCD_DEBUG_ARGS)
+	"$(_MTB_RECIPE__GDB_SERVER)" $(_MTB_RECIPE__DEBUG_ARGS)
 else
 	$(MTB__NOISE)echo "Library application detected. Skip debug... ";\
 	echo
 endif
 
-attach:
+attach: debug_interface_check
 	$(MTB__NOISE)echo;\
 	echo "Starting GDB Client... ";\
 	$(MTB_TOOLCHAIN_GCC_ARM__GDB) $(_MTB_RECIPE__OPENOCD_SYMBOL_IMG) -x $(_MTB_RECIPE__GDB_ARGS)
@@ -95,3 +126,5 @@ attach:
 
 .PHONY: erase program program_application_bootstrap program_proj
 .PHONY: qprogram qprogram_application_bootstrap qprogram_proj debug qdebug attach
+.PHONY: erase_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR) jlink_generate program_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
+.PHONY: qprogram_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR) debug_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR) qdebug_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
