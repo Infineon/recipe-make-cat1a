@@ -32,7 +32,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch PSoC6 &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (JLink)",
+            "name": "Launch &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (JLink)",
             "type": "cortex-debug",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -62,7 +62,7 @@
         // executable matches the image in the chip exactly, or else strange things can happen
         // with breakpoints, variables, etc.
         {
-            "name": "Attach PSoC6 &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (JLink)",
+            "name": "Attach &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (JLink)",
             "type": "cortex-debug",
             "request": "attach",
             "cwd": "${workspaceFolder}",

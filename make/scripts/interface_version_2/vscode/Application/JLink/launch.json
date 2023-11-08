@@ -63,7 +63,7 @@
                 "lifecycleManagedByParent": true,
                 "launches": [                               // Array of launches. Order is respected
                     {
-                        "name": "Attach PSoC6 CM4 (JLink)",     // Name of another configuration
+                        "name": "Attach &&_MTB_RECIPE__MCU_NAME&& CM4 (JLink)",     // Name of another configuration
                         "folder": "./&&_MTB_RECIPE__SECOND_APP_NAME&&",
                         "overrides": {
                             "overrideRestartCommands": [

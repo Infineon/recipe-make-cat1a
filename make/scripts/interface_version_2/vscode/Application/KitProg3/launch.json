@@ -54,7 +54,7 @@
                 // Comment this next lines out if you don't want to reload program
                 "monitor flash write_image erase {&&_MTB_RECIPE__HEX_FILE_APPLICATION&&}",
                 "monitor reset init",
-                "monitor psoc6 reset_halt sysresetreq"
+                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& reset_halt sysresetreq"
             ],
             // svdFile is optional, it can be very large.
             "svdFile": "&&_MTB_RECIPE__APPLICATION_SVD_FILE_NAME&&",
@@ -90,7 +90,7 @@
                 "lifecycleManagedByParent": true,
                 "launches": [                               // Array of launches. Order is respected
                     {
-                        "name": "Attach PSoC6 CM4 (KitProg3_MiniProg4)",     // Name of another configuration
+                        "name": "Attach &&_MTB_RECIPE__MCU_NAME&& CM4 (KitProg3_MiniProg4)",     // Name of another configuration
                         "folder": "./&&_MTB_RECIPE__SECOND_APP_NAME&&",
                         "overrides": {
                             "overrideRestartCommands": [
@@ -122,7 +122,7 @@
             ],
             "overrideLaunchCommands": [
                 "set remotetimeout 15",
-                "monitor psoc6 sflash_restrictions 1",
+                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1",
                 "monitor program {&&_MTB_RECIPE__HEX_FILE_APPLICATION&&}",
                 "monitor reset_config srst_only",
                 "monitor reset run",
@@ -160,7 +160,7 @@
             "overrideLaunchCommands": [
                 "set remotetimeout 15",
                 "monitor reset init",
-                "monitor psoc6 sflash_restrictions 1",
+                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1",
                 "monitor erase_all"
             ],
             "postStartSessionCommands": [

@@ -32,7 +32,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch PSoC6 &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (KitProg3_MiniProg4)",
+            "name": "Launch &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (KitProg3_MiniProg4)",
             "type": "cortex-debug",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -53,7 +53,7 @@
                 // Comment this next line out if you don't want to reload program
                 "monitor program {&&_MTB_RECIPE__HEX_FILE&&}",
                 "monitor reset run",//PSoC6 Only//
-                "monitor psoc6 reset_halt sysresetreq"//PSoC6 Only//
+                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& reset_halt sysresetreq"//PSoC6 Only//
                 "monitor reset init"//PSoC64 Only//
             ],
             "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,//PSoC6 Only//
@@ -89,7 +89,7 @@
         // executable matches the image in the chip exactly, or else strange things can happen
         // with breakpoints, variables, etc.
         {
-            "name": "Attach PSoC6 &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (KitProg3_MiniProg4)",
+            "name": "Attach &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (KitProg3_MiniProg4)",
             "type": "cortex-debug",
             "request": "attach",
             "cwd": "${workspaceFolder}",
@@ -148,7 +148,7 @@
             "overrideLaunchCommands": [
                 "set remotetimeout 15",
                 "monitor reset init",
-                "monitor psoc6 sflash_restrictions 1",
+                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1",
                 "monitor erase_all"
             ],
             "postStartSessionCommands": [
@@ -178,7 +178,7 @@
             ],
             "overrideLaunchCommands": [
                 "set remotetimeout 15",
-                "monitor psoc6 sflash_restrictions 1",
+                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1",
                 "monitor program {&&_MTB_RECIPE__HEX_FILE&&}",
                 "monitor reset_config srst_only",
                 "monitor reset run",

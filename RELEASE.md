@@ -15,6 +15,9 @@ This release of the PSoC 6 GNU make build recipe includes complete support for b
     * ARM Compiler 6
 
 ### What Changed?
+#### v2.1.2
+* Added programming and debugging support for Traveo II B-E.
+
 #### v2.1.1
 * Added support for BSP_PROGRAM_INTERFACE to select debug interface. Valid values are "KitProg3" and "JLink". Default value is "KitProg3".
 * Eclipse and VSCode export will now only generate the launch configuration for the selected programming interface.

@@ -53,11 +53,13 @@ _MTB_RECIPE__OPENOCD_PROGRAM_IMG=$(PROG_FILE)
 endif
 
 ifeq (,$(_MTB_RECIPE__IS_SECURE_DEVICE))
+ifeq (,$(_MTB_RECIPE__IS_TVII_DEVICE))
 _MTB_RECIPE__OPENOCD_CUSTOM_COMMAND?=psoc6 allow_efuse_program off;
 endif
+endif
 
-_MTB_RECIPE__OPENOCD_ERASE=init; reset init; psoc6 sflash_restrictions 1; erase_all; exit;
-_MTB_RECIPE__OPENOCD_PROGRAM=psoc6 sflash_restrictions 1; program $(_MTB_RECIPE__OPENOCD_PROGRAM_IMG) verify reset exit;
+_MTB_RECIPE__OPENOCD_ERASE=init; reset init; $(_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME) sflash_restrictions 1; erase_all; exit;
+_MTB_RECIPE__OPENOCD_PROGRAM=$(_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME) sflash_restrictions 1; program $(_MTB_RECIPE__OPENOCD_PROGRAM_IMG) verify reset exit;
 _MTB_RECIPE__OPENOCD_DEBUG=$(_MTB_RECIPE__OPENOCD_CHIP_NAME).cpu.$(_MTB_RECIPE__OPENOCD_CORE) configure -rtos auto -rtos-wipe-on-reset-halt 1; $(_MTB_RECIPE__OPENOCD_EXTRA_PORT_FLAG); init; reset init;
 
 _MTB_RECIPE__OPENOCD_ERASE_ARGS=$(_MTB_RECIPE__OPENOCD_SCRIPTS) -c \

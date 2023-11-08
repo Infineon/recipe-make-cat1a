@@ -18,7 +18,7 @@
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerExecutable" value="${openocd_path}/${openocd_executable}"/>
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerGdbPortNumber" value="3333"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerLog" value=""/>
-<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerOther" value="-s &quot;${openocd_path}/../scripts&quot;&#13;&#10;&&_MTB_RECIPE__QSPI_CFG_PATH&&-c &quot;source [find interface/kitprog3.cfg]&quot;&#13;&#10;-c &quot;transport select swd&quot;&#13;&#10;&&_MTB_RECIPE__OPENOCD_CM0_FLAG&&-c &quot;puts stderr {Started by GNU MCU Eclipse}&quot;&#13;&#10;-c &quot;source [find target/&&_MTB_RECIPE__OPENOCD_CFG&&]&quot;&#13;&#10;-c &quot;psoc6 sflash_restrictions 1&quot;&#13;&#10;-c &quot;init; reset init&quot;"/>
+<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerOther" value="-s &quot;${openocd_path}/../scripts&quot;&#13;&#10;&&_MTB_RECIPE__QSPI_CFG_PATH&&-c &quot;source [find interface/kitprog3.cfg]&quot;&#13;&#10;-c &quot;transport select swd&quot;&#13;&#10;&&_MTB_RECIPE__OPENOCD_CM0_FLAG&&-c &quot;puts stderr {Started by GNU MCU Eclipse}&quot;&#13;&#10;-c &quot;source [find target/&&_MTB_RECIPE__OPENOCD_CFG&&]&quot;&#13;&#10;-c &quot;&&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1&quot;&#13;&#10;-c &quot;init; reset init&quot;"/>
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerTelnetPortNumber" value="4444"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.otherInitCommands" value=""/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.otherRunCommands" value="quit"/>
