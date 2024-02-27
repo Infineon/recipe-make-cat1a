@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="ilg.gnumcueclipse.debug.gdbjtag.jlink.launchConfigurationType">
 <stringAttribute key="com.cypress.studio.launch.owner.0" value="&&APPLICATION_UUID&&"/>
-<stringAttribute key="com.cypress.studio.launch.owner.1" value="&&PROJECT_UUID_CM0P_0&&"/>
-<stringAttribute key="com.cypress.studio.launch.owner.2" value="&&PROJECT_UUID_CM4_0&&"/>
+<stringAttribute key="com.cypress.studio.launch.owner.1" value="&&PROJECT_UUID_CM0P&&"/>
+<stringAttribute key="com.cypress.studio.launch.owner.2" value="&&PROJECT_UUID_CM4&&"/>
 <stringAttribute key="com.cypress.studio.launch.mode" value="run"/>
 <booleanAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.doConnectToRunning" value="false"/>
 <booleanAttribute key="ilg.gnumcueclipse.debug.gdbjtag.jlink.doContinue" value="true"/>

@@ -36,7 +36,7 @@
             "type": "cortex-debug",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "executable": "&&_MTB_RECIPE__ELF_FILE_APPLICATION&&",
+            "executable": "&&_MTB_RECIPE__CM0_CM4_ELF_FILE_APPLICATION&&",
             "servertype": "openocd",
             "searchDir": [
                 "${workspaceFolder}",
@@ -46,20 +46,23 @@
             "configFiles": [
                 "openocd.tcl"
             ],
+            "openOCDPreConfigLaunchCommands": [
+                "set TARGET_AP cm0_cm4_ap"//PSoC64 Only//
+            ],
             "overrideLaunchCommands": [
                 "set mem inaccessible-by-default off",
                 "-enable-pretty-printing",
-                "set remotetimeout 15",
+                "set remotetimeout 25",
                 "monitor reset init",
                 // Comment this next lines out if you don't want to reload program
                 "monitor flash write_image erase {&&_MTB_RECIPE__HEX_FILE_APPLICATION&&}",
                 "monitor reset init",
-                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& reset_halt sysresetreq"
+                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& reset_halt sysresetreq"//PSoC6 Only//
             ],
             // svdFile is optional, it can be very large.
             "svdFile": "&&_MTB_RECIPE__APPLICATION_SVD_FILE_NAME&&",
             "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,
-            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER&&, // Set to 0 for the CM0+, set to 1 for the CM4
+            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER_MULTICORE&&, // Set to 0 for the CM0+, set to 1 for the CM4
             "postStartSessionCommands": [
                 // Needed if runToMain is false
                 // Following two commands are needed to get gdb and openocd and HW all in sync.
@@ -90,14 +93,14 @@
                 "lifecycleManagedByParent": true,
                 "launches": [                               // Array of launches. Order is respected
                     {
-                        "name": "Attach &&_MTB_RECIPE__MCU_NAME&& CM4 (KitProg3_MiniProg4)",     // Name of another configuration
+                        "name": "Attach &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__MULTICORE_SECOND_CONFIG_VSCODE&& (KitProg3_MiniProg4)",     // Name of another configuration
                         "folder": "./&&_MTB_RECIPE__SECOND_APP_NAME&&",
                         "overrides": {
                             "overrideRestartCommands": [
                                 "monitor halt"
                             ],
                             "postStartSessionCommands": [
-                                "tb main",
+                                "tb main",//PSoC6 Only//
                                 "continue"
                             ]
                         }
@@ -120,8 +123,11 @@
             "configFiles": [
                 "openocd.tcl"
             ],
+            "openOCDPreConfigLaunchCommands": [
+                "set TARGET_AP cm0_cm4_ap"//PSoC64 Only//
+            ],
             "overrideLaunchCommands": [
-                "set remotetimeout 15",
+                "set remotetimeout 25",
                 "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1",
                 "monitor program {&&_MTB_RECIPE__HEX_FILE_APPLICATION&&}",
                 "monitor reset_config srst_only",
@@ -131,6 +137,7 @@
             "postStartSessionCommands": [
                 "quit"
             ],
+            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER_MULTICORE&&,//PSoC64 Only//
             "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,
             "preLaunchTask": "Build",    // Set this to run a task from tasks.json
                                                         // before device programming
@@ -152,13 +159,14 @@
                 "${config:modustoolbox.toolsPath}/&&_MTB_RECIPE__OPENOCD_SCRIPTS_DIR_RELATIVE&&/"
             ],
             "openOCDPreConfigLaunchCommands": [
-                "set DISABLE_SMIF 1"
+                "set DISABLE_SMIF 1",
+                "set TARGET_AP cm0_cm4_ap"//PSoC64 Only//
             ],
             "configFiles": [
                 "openocd.tcl"
             ],
             "overrideLaunchCommands": [
-                "set remotetimeout 15",
+                "set remotetimeout 25",
                 "monitor reset init",
                 "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1",
                 "monitor erase_all"
@@ -166,6 +174,7 @@
             "postStartSessionCommands": [
                 "quit"
             ],
+            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER_MULTICORE&&,//PSoC64 Only//
             "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,
             "showDevDebugOutput": "none",
             "presentation": {

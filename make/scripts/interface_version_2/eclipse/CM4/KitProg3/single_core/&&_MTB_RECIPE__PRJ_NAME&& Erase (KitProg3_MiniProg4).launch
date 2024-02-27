@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="ilg.gnumcueclipse.debug.gdbjtag.openocd.launchConfigurationType">
-<stringAttribute key="com.cypress.studio.launch.owner.0" value="&&PROJECT_UUID_CM4_0&&"/>
+<stringAttribute key="com.cypress.studio.launch.owner.0" value="&&PROJECT_UUID_CM4&&"/>
 <booleanAttribute key="com.cypress.studio.launch.hide" value="true"/>
 <stringAttribute key="com.cypress.studio.launch.mode" value="run"/>
 <booleanAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.doContinue" value="false"/>
@@ -19,7 +19,7 @@
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerExecutable" value="${openocd_path}/${openocd_executable}"/>
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerGdbPortNumber" value="3333"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerLog" value=""/>
-<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerOther" value="-s &quot;${openocd_path}/../scripts&quot;&#13;&#10;-c &quot;source [find interface/kitprog3.cfg]&quot;&#13;&#10;-c &quot;transport select swd&quot;&#13;&#10;&&_MTB_RECIPE__OPENOCD_CM0_FLAG&&&&_MTB_RECIPE__OPENOCD_SMIF_DISABLE&&-c &quot;source [find target/&&_MTB_RECIPE__OPENOCD_CFG&&]&quot;&#13;&#10;-c &quot;init; reset init; &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1&quot;&#13;&#10;-c &quot;if [catch {erase_all} ] { echo {** Erase operation failed **} } else { echo {** Erase operation completed successfully **} }&quot;&#13;&#10;-c &quot;shutdown&quot;"/>
+<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerOther" value="-s &quot;${openocd_path}/../scripts&quot;&#13;&#10;-c &quot;source [find interface/kitprog3.cfg]&quot;&#13;&#10;-c &quot;transport select swd&quot;&#13;&#10;&&_MTB_RECIPE__OPENOCD_CM0_FLAG&&&&_MTB_RECIPE__OPENOCD_TARGET_AP&&&&_MTB_RECIPE__OPENOCD_SMIF_DISABLE&&-c &quot;source [find target/&&_MTB_RECIPE__OPENOCD_CFG&&]&quot;&#13;&#10;-c &quot;init; reset init; &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& sflash_restrictions 1&quot;&#13;&#10;-c &quot;if [catch {erase_all} ] { echo {** Erase operation failed **} } else { echo {** Erase operation completed successfully **} }&quot;&#13;&#10;-c &quot;shutdown&quot;"/>
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerTelnetPortNumber" value="4444"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.otherInitCommands" value=""/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.otherRunCommands" value=""/>

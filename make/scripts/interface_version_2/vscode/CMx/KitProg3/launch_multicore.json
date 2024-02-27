@@ -57,7 +57,7 @@
                 "monitor reset init"//PSoC64 Only//
             ],
             "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,//PSoC6 Only//
-            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER&&,//PSoC6 Only//  // Set to 0 for the CM0+, set to 1 for the CM4
+            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER&&,// Set to 0 for the CM0+, set to 1 for the CM4
             "postStartSessionCommands": [       
                 // Needed if runToMain is false //PSoC6 Only//
                 // Following two commands are needed to get gdb and openocd and HW all in sync. //PSoC6 Only//
@@ -70,9 +70,7 @@
                 "stepi"//PSoC6 Only//
             ],
             "overrideRestartCommands": [
-                "starti"//PSoC6 Only//
-                // For PSoC64 the 'starti' can not be used because target will halt in the FlashBoot //PSoC64 Only//
-                "start"//PSoC64 Only//
+                "starti"
             ],
             "postRestartSessionCommands": [
             ],
@@ -114,7 +112,7 @@
                 "info threads"
             ],
             "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,//PSoC6 Only//
-            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER&&,//PSoC6 Only//  // Set to 0 for the CM0+, set to 1 for the CM4
+            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER&&,// Set to 0 for the CM0+, set to 1 for the CM4
             "overrideRestartCommands": [
                 "starti"
             ],

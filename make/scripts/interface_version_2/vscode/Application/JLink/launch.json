@@ -36,9 +36,9 @@
             "type": "cortex-debug",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "executable": "&&_MTB_RECIPE__ELF_FILE_APPLICATION&&",
+            "executable": "&&_MTB_RECIPE__CM0_CM4_ELF_FILE_APPLICATION&&",
             "servertype": "jlink",
-            "device": "&&_MTB_RECIPE__DEVICE_DEBUG&&",
+            "device": "&&_MTB_RECIPE__CM0_CM4_JLINK_DEVICE&&",
             "interface": "swd",
             "overrideRestartCommands": [
                 "starti"
@@ -63,7 +63,7 @@
                 "lifecycleManagedByParent": true,
                 "launches": [                               // Array of launches. Order is respected
                     {
-                        "name": "Attach &&_MTB_RECIPE__MCU_NAME&& CM4 (JLink)",     // Name of another configuration
+                        "name": "Attach &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__MULTICORE_SECOND_CONFIG_VSCODE&& (JLink)",     // Name of another configuration
                         "folder": "./&&_MTB_RECIPE__SECOND_APP_NAME&&",
                         "overrides": {
                             "overrideRestartCommands": [
