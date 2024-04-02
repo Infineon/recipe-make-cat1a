@@ -207,7 +207,7 @@ recipe_build_data_file:
 ##############################################
 # UV
 ##############################################
-_MTB_RECIPE__CMSIS_ARCH_NAME:=PSoC6_DFP
+_MTB_RECIPE__CMSIS_ARCH_NAME:=CAT1A_DFP
 _MTB_RECIPE__CMSIS_VENDOR_NAME:=Infineon
 _MTB_RECIPE__CMSIS_VENDOR_ID:=7
 

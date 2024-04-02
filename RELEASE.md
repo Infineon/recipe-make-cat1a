@@ -15,6 +15,9 @@ This release of the PSoC 6 GNU make build recipe includes complete support for b
     * ARM Compiler 6
 
 ### What Changed?
+#### v2.2.1
+* Minor update to support export into uVision IDE for new CMSIS Device Family Pack
+
 #### v2.2.0
 * Improved multi-project applications support.
 
@@ -106,7 +109,7 @@ This version of the PSoC 6 build system was validated for compatibility with the
 
 | Software and Tools                        | Version |
 | :---                                      | :----:  |
-| ModusToolbox Software Environment         | 3.1     |
+| ModusToolbox Software Environment         | 3.2     |
 | GCC Compiler                              | 11.3    |
 | IAR Compiler                              | 9.3     |
 | ARM Compiler                              | 6.16    |
