@@ -6,7 +6,8 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2024 Cypress Semiconductor Corporation
+# (c) 2018-2024, Cypress Semiconductor Corporation (an Infineon company) or
+# an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,11 +39,30 @@ else
 _MTB_RECIPE__OPENOCD_QSPI=-s $(_MTB_RECIPE__OPENOCD_QSPI_CFG_PATH)
 endif
 
+ifneq ($(MTB_PROBE_SERIAL),)
+_MTB_RECIPE__OPENOCD_PROBE_SERIAL:=adapter serial $(MTB_PROBE_SERIAL);
+_MTB_RECIPE__JLINK_PROBE_SERIAL:=-USB $(MTB_PROBE_SERIAL)
+endif
+
+_MTB_RECIPE__PROBE_INTERFACE:=swd
+ifneq ($(MTB_PROBE_INTERFACE),)
+_MTB_RECIPE__PROBE_INTERFACE:=$(MTB_PROBE_INTERFACE)
+endif
+
+ifeq ($(MTB_PROBE_INTERFACE),jtag)
+_MTB_RECIPE__JLINK_JTAG_CONF=-JTAGConf -1,-1
+endif
+
+ifneq ($(MTB_ERASE_EXT_MEM),)
+_MTB_RECIPE__OPENOCD_ERASE_EXT_MEM=$(_MTB_RECIPE__OPENOCD_QSPI)
+_MTB_RECIPE__JLINK_ERASE_EXT_MEM:=exec EnableEraseAllFlashBanks
+endif
+
 ifeq ($(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR), JLink)
 _MTB_RECIPE__GDB_SERVER=$(MTB_CORE__JLINK_GDB_EXE)
 _MTB_RECIPE__PROGRAM_ERASE_TOOL=$(MTB_CORE__JLINK_EXE)
-_MTB_RECIPE__ERASE_ARGS=-AutoConnect 1 -ExitOnError 1 -NoGui 1 -Device $(_MTB_RECIPE__JLINK_DEVICE_CFG_PROGRAM) -If SWD -Speed auto -CommandFile $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
-_MTB_RECIPE__PROGRAM_ARGS=-AutoConnect 1 -ExitOnError 1 -NoGui 1 -Device $(_MTB_RECIPE__JLINK_DEVICE_CFG_PROGRAM) -If SWD -Speed auto -CommandFile $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
+_MTB_RECIPE__ERASE_ARGS=-AutoConnect 1 -ExitOnError 1 -NoGui 1 $(_MTB_RECIPE__JLINK_PROBE_SERIAL) -Device $(_MTB_RECIPE__JLINK_DEVICE_CFG_PROGRAM) -If $(_MTB_RECIPE__PROBE_INTERFACE) $(_MTB_RECIPE__JLINK_JTAG_CONF) -Speed auto -CommandFile $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
+_MTB_RECIPE__PROGRAM_ARGS=-AutoConnect 1 -ExitOnError 1 -NoGui 1 $(_MTB_RECIPE__JLINK_PROBE_SERIAL) -Device $(_MTB_RECIPE__JLINK_DEVICE_CFG_PROGRAM) -If $(_MTB_RECIPE__PROBE_INTERFACE) $(_MTB_RECIPE__JLINK_JTAG_CONF) -Speed auto -CommandFile $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
 _MTB_RECIPE__DEBUG_ARGS=$(_MTB_RECIPE__JLINK_DEBUG_ARGS)
 else
 _MTB_RECIPE__GDB_SERVER=$(CY_TOOL_openocd_EXE_ABS)
@@ -54,10 +74,22 @@ endif
 
 # Generate command files required by JLink tool for programming/erasing
 jlink_generate:
-	sed "s|&&PROG_FILE&&|$(_MTB_RECIPE__OPENOCD_PROGRAM_IMG)|g;" $(MTB_TOOLS__RECIPE_DIR)/make/scripts/program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
-	sed "s|&&ERASE_OPTION&&|$(_MTB_RECIPE_JLINK_CMDFILE_ERASE)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_program.jlink
-	sed "s|&&SECOND_PROG_FILE&&|$(_MTB_RECIPE__OPENOCD_ADDITIONAL_IMG)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
-	cp $(MTB_TOOLS__RECIPE_DIR)/make/scripts/erase.jlink $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
+	$(MTB__NOISE)sed "s|&&PROG_FILE&&|$(_MTB_RECIPE__OPENOCD_PROGRAM_IMG)|g;" $(MTB_TOOLS__RECIPE_DIR)/make/scripts/program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
+	$(MTB__NOISE)sed "s|&&ERASE_OPTION&&|$(_MTB_RECIPE_JLINK_CMDFILE_ERASE)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_program.jlink
+	$(MTB__NOISE)sed "s|&&SECOND_PROG_FILE&&|$(_MTB_RECIPE__OPENOCD_ADDITIONAL_IMG)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
+	$(MTB__NOISE)sed "s|&&EXTERNAL_MEM_ERASE&&|$(_MTB_RECIPE__JLINK_ERASE_EXT_MEM)|g;" $(MTB_TOOLS__RECIPE_DIR)/make/scripts/erase.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
+	$(MTB__NOISE)sed "s|&&EXTERNAL_MEM_ADDRESS_RANGE&&|$(_MTB_RECIPE__JLINK_ERASE_EXT_MEM_RANGE)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_erase.jlink
+	$(MTB__NOISE)mv -f $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_erase.jlink $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
+
+jlink_path_check:
+ifeq ($(LIBNAME),)
+	$(MTB__NOISE)echo;\
+	if [ -z "$(_MTB_RECIPE__PROGRAM_ERASE_TOOL)" ]; then\
+		echo "ERROR: Location of J-Link is not set. Use the MTB_JLINK_DIR variable to set the location of the J-Link directory.";\
+		echo;\
+		exit 1;\
+	fi
+endif
 
 # depends on $(_MTB_CORE__QBUILD_MK_FILE) to locate flash loaders
 erase: $(_MTB_CORE__QBUILD_MK_FILE) erase_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
@@ -70,10 +102,10 @@ erase_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR): debug_interface_check
 ifeq ($(MTB_CORE__APPLICATION_BOOTSTRAP),true)
 # Multi-core application: pass project-specific program target to the application level
 program_application_bootstrap:
-	$(MTB__NOISE)$(MAKE) -C .. program
+	$(MTB__NOISE)$(MAKE) -C .. program CY_SECONDSTAGE=
 
 qprogram_application_bootstrap:
-	$(MTB__NOISE)$(MAKE) -C .. qprogram
+	$(MTB__NOISE)$(MAKE) -C .. qprogram CY_SECONDSTAGE=
 
 program: program_application_bootstrap
 qprogram: qprogram_application_bootstrap
@@ -87,13 +119,13 @@ program_proj: program_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
 
 program_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR): build_proj memcalc
 
-program_JLink: jlink_generate
+program_JLink qprogram_JLink: jlink_generate jlink_path_check
 erase_JLink: jlink_generate
 
 qprogram_proj: qprogram_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR)
 
 # depends on $(_MTB_CORE__QBUILD_MK_FILE) to locate flash loaders
-program_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR) qprogram_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR): $(_MTB_CORE__QBUILD_MK_FILE) debug_interface_check
+program_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR) qprogram_$(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR): $(_MTB_CORE__QBUILD_MK_FILE) debug_interface_check jlink_generate
 ifeq ($(LIBNAME),)
 	$(MTB__NOISE)echo;\
 	"$(_MTB_RECIPE__PROGRAM_ERASE_TOOL)" $(_MTB_RECIPE__PROGRAM_ARGS)

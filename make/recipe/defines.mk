@@ -2,7 +2,7 @@
 # \file defines.mk
 #
 # \brief
-# Defines, needed for the PSoC 6 build recipe.
+# Defines, needed for the PSOC(TM) 6 build recipe.
 #
 ################################################################################
 # \copyright
@@ -38,11 +38,19 @@ _MTB_RECIPE__DEFAULT_PROGRAM_INTERFACE:=KitProg3
 # Compactibility interface for this recipe make
 #
 MTB_RECIPE__INTERFACE_VERSION:=2
+MTB_RECIPE__EXPORT_INTERFACES:=1 2 3
 
 #
 # List the supported toolchains
 #
-CY_SUPPORTED_TOOLCHAINS:=GCC_ARM IAR ARM A_Clang
+ifdef CY_SUPPORTED_TOOLCHAINS
+MTB_SUPPORTED_TOOLCHAINS?=$(CY_SUPPORTED_TOOLCHAINS)
+else
+MTB_SUPPORTED_TOOLCHAINS?=GCC_ARM IAR ARM A_Clang LLVM_ARM
+endif
+
+# For BWC with Makefiles that do anything with CY_SUPPORTED_TOOLCHAINS
+CY_SUPPORTED_TOOLCHAINS:=$(MTB_SUPPORTED_TOOLCHAINS)
 
 _MTB_RECIPE__START_FLASH:=0x10000000
 

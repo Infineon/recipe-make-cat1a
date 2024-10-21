@@ -1,8 +1,8 @@
-# PSoC 6 GNU make Build System Release Notes
-This repo provides the build recipe make files and scripts for building and programming PSoC 6 applications. Builds can be run either through a command-line interface (CLI) or through the Eclipse IDE for ModusToolbox.
+# PSOC™ 6 GNU make Build System Release Notes
+This repo provides the build recipe make files and scripts for building and programming PSOC™ 6 applications. Builds can be run either through a command-line interface (CLI) or through a supported IDE such as Eclipse or VS Code.
 
 ### What's Included?
-This release of the PSoC 6 GNU make build recipe includes complete support for building, programming, and debugging PSoC 6 application projects. It is expected that a code example contains a top level make file for itself and references a Board Support Package (BSP) that defines specific items, like the PSoC 6 part, for the target board. Supported functionality includes the following:
+This release of the PSOC™ 6 GNU make build recipe includes complete support for building, programming, and debugging PSOC™ 6 application projects. It is expected that a code example contains a top level make file for itself and references a Board Support Package (BSP) that defines specific items, like the PSOC™ 6 part, for the target board. Supported functionality includes the following:
 
 * Supported operations:
     * Build
@@ -13,10 +13,22 @@ This release of the PSoC 6 GNU make build recipe includes complete support for b
     * GCC
     * IAR
     * ARM Compiler 6
+    * LLVM Embedded Toolchain for Arm (Experimental)
 
 ### What Changed?
+#### v2.3.0
+* Experimental support for LLVM Embedded Toolchain for Arm.
+* Optimization for speed changed to optimization for size for the IAR toolchain.
+* The feature of setting the default location of the ARM and IAR toolchains has been deprecated.
+* Added support for Infineon EdgeProtectTool.
+* Added task in VS Code export's tasks.json in multicore application to only build the current project.
+* Added option for Eclipse export to only build the current project in multicore application.
+* Added launch configurations for Eclipse and VS Code to only program/debug a single project in multi-core application.
+* Added a "last_config" build configuration directory that contains the hex file and elf file from last build.
+* VS Code and Eclipse launch configurations now use "last_config" directory. Launch configurations no longer have to be re-generated when switching between "Debug" and "Release".
+
 #### v2.2.1
-* Minor update to support export into uVision IDE for new CMSIS Device Family Pack
+* Minor update to support export into uVision IDE for new CMSIS Device Family Pack.
 
 #### v2.2.0
 * Improved multi-project applications support.
@@ -26,7 +38,7 @@ This release of the PSoC 6 GNU make build recipe includes complete support for b
 
 #### v2.1.1
 * Added support for BSP_PROGRAM_INTERFACE to select debug interface. Valid values are "KitProg3" and "JLink". Default value is "KitProg3".
-* Eclipse and VSCode export will now only generate the launch configuration for the selected programming interface.
+* Eclipse and VS Code export will now only generate the launch configuration for the selected programming interface.
 
 #### v2.0.0
 * Major version update. Significant changes to support ModusToolbox 3.0
@@ -45,7 +57,7 @@ This release of the PSoC 6 GNU make build recipe includes complete support for b
 
 #### v1.7.1
 * Fix an issue with make progtool
-* Improved eclipse and vscode launch configuration
+* Improved Eclipse and VS Code launch configurations
 
 #### v1.7.0
 * Added ml-configurator
@@ -65,7 +77,7 @@ This release of the PSoC 6 GNU make build recipe includes complete support for b
 #### v1.4.0
 * Improved compatibility with MTB 2.0 and 2.1 tools
 * Improved support for J-Link
-* Improved support for different toolchains in VSCode
+* Improved support for different toolchains in VS Code
 * Improved support for PSoC 64 based boards
 * Fixed issue with output formatting on Mac
 
@@ -105,11 +117,11 @@ Builds require that the ModusToolbox tools be installed on your machine. This co
 To list the build options, run the "help" target by typing "make help" in CLI. For a verbose documentation on a specific subject type "make help CY\_HELP={variable/target}", where "variable" or "target" is one of the listed make variables or targets.
 
 ### Supported Software and Tools
-This version of the PSoC 6 build system was validated for compatibility with the following Software and Tools:
+This version of the PSOC™ 6 build system was validated for compatibility with the following Software and Tools:
 
 | Software and Tools                        | Version |
 | :---                                      | :----:  |
-| ModusToolbox Software Environment         | 3.2     |
+| ModusToolbox Software Environment         | 3.3     |
 | GCC Compiler                              | 11.3    |
 | IAR Compiler                              | 9.3     |
 | ARM Compiler                              | 6.16    |
@@ -121,5 +133,5 @@ Minimum required ModusToolbox Software Environment: v3.0
 * [ModusToolbox](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software)
 
 ---
-© Cypress Semiconductor Corporation, 2019-2024.
+(c) 2019-2024, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 

@@ -6,7 +6,8 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2024 Cypress Semiconductor Corporation
+# (c) 2018-2024, Cypress Semiconductor Corporation (an Infineon company) or
+# an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,6 +40,15 @@ ifneq ($(CY_COMPILER_PATH),)
 MTB_TOOLCHAIN_ARM__BASE_DIR:=$(call mtb_core__escaped_path,$(CY_COMPILER_PATH))
 else
 MTB_TOOLCHAIN_ARM__BASE_DIR:=C:/Program\ Files/ARMCompiler6.16
+ifeq ($(CY_SECONDSTAGE),)
+ifneq ($(filter $(MAKECMDGOALS), build build_proj qbuild qbuild_proj all program program_proj uvision uvision5),)
+$(info Note: The CY_COMPILER_ARM_DIR is not set. The default path of the ARM toolchain is $(MTB_TOOLCHAIN_ARM__BASE_DIR).\
+If it is not correct, set the CY_COMPILER_ARM_DIR variable to the location of the ARM toolchain directory.)
+$(info Note: The feature of setting the default location of the ARM toolchain has been deprecated.\
+It will be removed in the next minor release. Set the CY_COMPILER_ARM_DIR variable to the location\
+of the ARM toolchain directory.)
+endif
+endif
 endif
 endif
 
@@ -245,7 +255,7 @@ _MTB_TOOLCHAIN_ARM__VFP_CFLAGS:=-mfloat-abi=hard -mfpu=fpv5-sp-d16
 _MTB_TOOLCHAIN_ARM__VFP_FLAGS:=--fpu=FPv5-SP
 else
 # FPv5 FPU, hardfp, double-precision
-_MTB_TOOLCHAIN_ARM__VFP_CFLAGS:=-mfloat-abi=hard -mfpu=fpv5-d16
+_MTB_TOOLCHAIN_ARM__VFP_CFLAGS:=-mfloat-abi=hard
 _MTB_TOOLCHAIN_ARM__VFP_FLAGS:=--fpu=FPv5_D16
 endif
 else ifeq ($(VFP_SELECT),softfloat)
@@ -264,7 +274,7 @@ _MTB_TOOLCHAIN_ARM__VFP_CFLAGS:=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
 _MTB_TOOLCHAIN_ARM__VFP_FLAGS:=--fpu=SoftVFP+FPv5-SP
 else
 # FPv5 FPU, softfp, double-precision
-_MTB_TOOLCHAIN_ARM__VFP_CFLAGS:=-mfloat-abi=softfp -mfpu=fpv5-d16
+_MTB_TOOLCHAIN_ARM__VFP_CFLAGS:=-mfloat-abi=softfp
 _MTB_TOOLCHAIN_ARM__VFP_FLAGS:=--fpu=SoftVFP+FPv5_D16
 endif
 endif
@@ -280,7 +290,8 @@ MTB_TOOLCHAIN_ARM__CFLAGS:=\
 	$(_MTB_TOOLCHAIN_ARM__COMMON_FLAGS)\
 	-g\
 	-fshort-enums\
-	-fshort-wchar
+	-fshort-wchar\
+	-fdiagnostics-absolute-paths
 
 # Command line flags for cpp-files
 MTB_TOOLCHAIN_ARM__CXXFLAGS:=$(MTB_TOOLCHAIN_ARM__CFLAGS) -fno-rtti -fno-exceptions
@@ -288,7 +299,8 @@ MTB_TOOLCHAIN_ARM__CXXFLAGS:=$(MTB_TOOLCHAIN_ARM__CFLAGS) -fno-rtti -fno-excepti
 # Command line flags for s-files
 MTB_TOOLCHAIN_ARM__ASFLAGS:=\
 	$(_MTB_TOOLCHAIN_ARM__FLAGS_CORE)\
-	$(_MTB_TOOLCHAIN_ARM__VFP_FLAGS)
+	$(_MTB_TOOLCHAIN_ARM__VFP_FLAGS)\
+	--diag_suppress=1950
 
 # Command line flags for linking
 MTB_TOOLCHAIN_ARM__LDFLAGS:=\
@@ -298,7 +310,7 @@ MTB_TOOLCHAIN_ARM__LDFLAGS:=\
 	--stdlib=libc++
 
 # Command line flags for archiving
-MTB_TOOLCHAIN_ARM__ARFLAGS:=-rvs
+MTB_TOOLCHAIN_ARM__ARFLAGS:=-s --create
 
 # Toolchain-specific suffixes
 MTB_TOOLCHAIN_ARM__SUFFIX_S  :=S
@@ -310,7 +322,8 @@ MTB_TOOLCHAIN_ARM__SUFFIX_CXX:=cxx
 MTB_TOOLCHAIN_ARM__SUFFIX_CC :=cc
 MTB_TOOLCHAIN_ARM__SUFFIX_HPP:=hpp
 MTB_TOOLCHAIN_ARM__SUFFIX_O  :=o
-MTB_TOOLCHAIN_ARM__SUFFIX_A  :=ar
+MTB_TOOLCHAIN_ARM__SUFFIX_A  :=a
+MTB_TOOLCHAIN_ARM__SUFFIX_AR :=ar
 MTB_TOOLCHAIN_ARM__SUFFIX_D  :=d
 MTB_TOOLCHAIN_ARM__SUFFIX_LS :=sct
 MTB_TOOLCHAIN_ARM__SUFFIX_MAP:=map
@@ -337,3 +350,5 @@ MTB_TOOLCHAIN_ARM__INCLUDES:=
 MTB_TOOLCHAIN_ARM__DEFINES:=$(_MTB_TOOLCHAIN_ARM__DEBUG_FLAG)
 
 MTB_TOOLCHAIN_ARM__VSCODE_INTELLISENSE_MODE:=clang-arm
+# ARM clang has the the same error syntax as GCC.
+MTB_TOOLCHAIN_ARM__VSCODE_PROBLEM_MATCHER:=gcc

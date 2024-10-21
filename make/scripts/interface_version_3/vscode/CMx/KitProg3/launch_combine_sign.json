@@ -1,0 +1,54 @@
+        {
+            "name": "&&MTB_COMBINE_SIGN_&&IDX&&_CONFIG_NAME&& Launch &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (KitProg3_MiniProg4)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "openocd",
+            "searchDir": [
+                "${workspaceFolder}",
+                "${config:modustoolbox.toolsPath}/&&_MTB_RECIPE__OPENOCD_SCRIPTS_DIR_RELATIVE&&/",
+                "&&_MTB_RECIPE__QSPI_CFG_PATH&&"
+            ],
+            "configFiles": [
+                "openocd.tcl"
+            ],
+            "overrideLaunchCommands": [
+                "set mem inaccessible-by-default off",
+                "-enable-pretty-printing",
+                "set remotetimeout 15",
+                // Comment this next line out if you don't want to reload program
+                "monitor program {&&MTB_COMBINE_SIGN_&&IDX&&_VSCODE_HEX_PATH&&}",
+                "monitor reset run",//PSoC6 Only//
+                "monitor &&_MTB_RECIPE__OPENOCD_MONITOR_CMDS_NAME&& reset_halt sysresetreq"//PSoC6 Only//
+                "monitor reset init"//PSoC64 Only//
+            ],
+            "numberOfProcessors": &&_MTB_RECIPE__PROCESSOR_COUNT&&,//PSoC6 Only//
+            "targetProcessor": &&_MTB_RECIPE__TARGET_PROCESSOR_NUMBER&&,// Set to 0 for the CM0+, set to 1 for the CM4
+            "postStartSessionCommands": [       
+                // Needed if runToMain is false //PSoC6 Only//
+                // Following two commands are needed to get gdb and openocd and HW all in sync. //PSoC6 Only//
+                // Or, execution context (PC, stack, registers, etc.) look like they are from before reset. //PSoC6 Only//
+                // The stepi, is a pretend instruction that does not actually do a stepi, but MUST be done //PSoC6 Only//
+                // Its a documented workaround in openocd. Do a 'monitor help' to see more info //PSoC6 Only//
+                // //PSoC6 Only//
+                // An alternative command to use is "continue" instead of the following two //PSoC6 Only//
+                "monitor gdb_sync",//PSoC6 Only//
+                "stepi"//PSoC6 Only//
+            ],
+            "overrideRestartCommands": [
+                "starti"
+            ],
+            "postRestartSessionCommands": [
+            ],
+            // svdFile is optional, it can be very large.
+            "svdFile": "&&_MTB_RECIPE__SVD_FILE_NAME&&",
+            "breakAfterReset": true,
+            "runToEntryPoint": "main",  // Specifies application entry point name where program will halt
+            "preLaunchTask": "Build Application",
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        }

@@ -6,7 +6,8 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2024 Cypress Semiconductor Corporation
+# (c) 2018-2024, Cypress Semiconductor Corporation (an Infineon company) or
+# an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +56,8 @@ MTB_RECIPE__LSFLAGS:=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__LSFLAGS)
 MTB_RECIPE__INCRSPFILE:=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__INCRSPFILE)
 MTB_RECIPE__INCRSPFILE_ASM:=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__INCRSPFILE_ASM)
 MTB_RECIPE__OBJRSPFILE:=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__OBJRSPFILE)
+
+ifneq ($(APPNAME),)
 
 # LS provided by the user's app
 ifneq ($(LINKER_SCRIPT),)
@@ -112,19 +115,29 @@ ifeq ($(TOOLCHAIN),A_Clang)
 include $(MTB_RECIPE__LINKER_SCRIPT)
 endif
 
+else # ($(APPNAME),)
+MTB_RECIPE__LINKER_SCRIPT=
+endif # ($(APPNAME),)
+
 
 # Compiler, assember, linker, etc. arguments.
 MTB_RECIPE__CFLAGS=$(CFLAGS) $(MTB_TOOLCHAIN_$(TOOLCHAIN)__CFLAGS)
 MTB_RECIPE__CXXFLAGS=$(CXXFLAGS) $(MTB_TOOLCHAIN_$(TOOLCHAIN)__CXXFLAGS)
 MTB_RECIPE__ASFLAGS=$(ASFLAGS) $(MTB_TOOLCHAIN_$(TOOLCHAIN)__ASFLAGS)
 MTB_RECIPE__ARFLAGS=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__ARFLAGS)
+ifneq ($(APPNAME),)
 MTB_RECIPE__LDFLAGS=$(LDFLAGS) $(MTB_TOOLCHAIN_$(TOOLCHAIN)__LDFLAGS)
+else
+MTB_RECIPE__LDFLAGS=
+endif # ($(APPNAME),)
 
+ifneq ($(APPNAME),)
 ifeq ($(TOOLCHAIN),A_Clang)
 MTB_RECIPE__LDFLAGS+=$(ACLANG_MEM_LDFLAGS)
 else
 MTB_RECIPE__LDFLAGS+=$(MTB_RECIPE__LSFLAGS)"$(MTB_RECIPE__LINKER_SCRIPT)"
-endif
+endif # ($(TOOLCHAIN),A_Clang)
+endif # ($(APPNAME),)
 
 # For BWC, be careful with _ [legacy] vs __ [new/standard]
 ifneq ($(MTB_RECIPE_CFLAGS),)
@@ -143,9 +156,11 @@ ifneq ($(MTB_RECIPE_ARFLAGS),)
 MTB_RECIPE__ARFLAGS:=$(MTB_RECIPE_ARFLAGS)
 endif
 
+ifneq ($(APPNAME),)
 ifneq ($(MTB_RECIPE_LDFLAGS),)
 MTB_RECIPE__LDFLAGS:=$(MTB_RECIPE_LDFLAGS)
-endif
+endif # ($(MTB_RECIPE_LDFLAGS),)
+endif # ($(APPNAME),)
 
 # N.B., can't use := because it may references $@
 MTB_RECIPE__DEPENDENCIES=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__DEPENDENCIES)
@@ -155,3 +170,4 @@ MTB_RECIPE__TOOLCHAIN_INCLUDES:=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__INCLUDES)
 MTB_RECIPE__TOOLCHAIN_DEFINES:=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__DEFINES)
 
 MTB_RECIPE__TOOLCHAIN_VSCODE_INTELLISENSE_MODE:=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__VSCODE_INTELLISENSE_MODE)
+MTB_RECIPE__TOOLCHAIN_VSCODE_PROBLEM_MATCHER:=$(MTB_TOOLCHAIN_$(TOOLCHAIN)__VSCODE_PROBLEM_MATCHER)

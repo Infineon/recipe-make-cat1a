@@ -6,7 +6,8 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2024 Cypress Semiconductor Corporation
+# (c) 2018-2024, Cypress Semiconductor Corporation (an Infineon company) or
+# an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -286,7 +287,7 @@ MTB_TOOLCHAIN_GCC_ARM__ASFLAGS:=\
 	$(_MTB_TOOLCHAIN_GCC_ARM__COMMON_FLAGS)
 
 # Command line flags for archiving
-MTB_TOOLCHAIN_GCC_ARM__ARFLAGS:=rvs
+MTB_TOOLCHAIN_GCC_ARM__ARFLAGS:=rs
 
 # Command line flags for linking
 MTB_TOOLCHAIN_GCC_ARM__LDFLAGS:=\
@@ -335,3 +336,4 @@ MTB_TOOLCHAIN_GCC_ARM__INCLUDES:=
 MTB_TOOLCHAIN_GCC_ARM__DEFINES:=$(_MTB_TOOLCHAIN_GCC_ARM__DEBUG_FLAG)
 
 MTB_TOOLCHAIN_GCC_ARM__VSCODE_INTELLISENSE_MODE:=gcc-arm
+MTB_TOOLCHAIN_GCC_ARM__VSCODE_PROBLEM_MATCHER:=gcc
