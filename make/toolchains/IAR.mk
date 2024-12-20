@@ -47,14 +47,12 @@ ifneq ($(CY_COMPILER_PATH),)
 MTB_TOOLCHAIN_IAR__BASE_DIR:=$(call mtb_core__escaped_path,$(CY_COMPILER_PATH))
 else
 MTB_TOOLCHAIN_IAR__BASE_DIR:=$(_MTB_TOOLCHAIN_IAR__DEFAULT)
-ifeq ($(CY_SECONDSTAGE),)
 ifneq ($(filter $(MAKECMDGOALS), build build_proj qbuild qbuild_proj all program program_proj ewarm ewarm8),)
 $(info Note: The CY_COMPILER_IAR_DIR is not set. The default path of the IAR toolchain is $(_MTB_TOOLCHAIN_IAR__DEFAULT).\
 If it is not correct, set the CY_COMPILER_IAR_DIR variable to the location of the IAR toolchain directory.)
 $(info Note: The feature of setting the default location of the IAR toolchain has been deprecated.\
 It will be removed in the next minor release. Set the CY_COMPILER_IAR_DIR variable to the location\
 of the IAR toolchain directory.)
-endif
 endif
 endif
 endif
