@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# (c) 2018-2024, Cypress Semiconductor Corporation (an Infineon company) or
+# (c) 2018-2025, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -84,7 +84,7 @@ endif
 
 ifneq ($(MTB_ERASE_EXT_MEM),)
 _MTB_RECIPE__OPENOCD_ERASE_EXT_MEM=$(_MTB_RECIPE__OPENOCD_QSPI)
-_MTB_RECIPE__JLINK_ERASE_EXT_MEM:=exec EnableEraseAllFlashBanks
+_MTB_RECIPE__JLINK_ENABLE_EXT_MEM_ERASE:=exec EnableEraseAllFlashBanks
 endif
 
 ifeq ($(_MTB_RECIPE__PROGRAM_INTERFACE_SUBDIR), JLink)
@@ -106,8 +106,14 @@ jlink_generate:
 	$(MTB__NOISE)sed "s|&&PROG_FILE&&|$(_MTB_RECIPE__OPENOCD_PROGRAM_IMG)|g;" $(MTB_TOOLS__RECIPE_DIR)/make/scripts/program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
 	$(MTB__NOISE)sed "s|&&ERASE_OPTION&&|$(_MTB_RECIPE_JLINK_CMDFILE_ERASE)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_program.jlink
 	$(MTB__NOISE)sed "s|&&SECOND_PROG_FILE&&|$(_MTB_RECIPE__OPENOCD_ADDITIONAL_IMG)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_program.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/program.jlink
-	$(MTB__NOISE)sed "s|&&EXTERNAL_MEM_ERASE&&|$(_MTB_RECIPE__JLINK_ERASE_EXT_MEM)|g;" $(MTB_TOOLS__RECIPE_DIR)/make/scripts/erase.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
-	$(MTB__NOISE)sed "s|&&EXTERNAL_MEM_ADDRESS_RANGE&&|$(_MTB_RECIPE__JLINK_ERASE_EXT_MEM_RANGE)|g;" $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_erase.jlink
+	$(MTB__NOISE)sed "s|&&_MTB_RECIPE__JLINK_ENABLE_EXT_MEM_ERASE&&|$(_MTB_RECIPE__JLINK_ENABLE_EXT_MEM_ERASE)|g;" $(MTB_TOOLS__RECIPE_DIR)/make/scripts/erase.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
+	$(MTB__NOISE)if [ -z "$(_MTB_RECIPE__JLINK_ERASE_EXT_MEM)" ]; then \
+		sed -e 's/&&_MTB_RECIPE__JLINK_ERASE_EXT_MEM&&//' $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_erase.jlink; \
+	else \
+		sed -e '/&&_MTB_RECIPE__JLINK_ERASE_EXT_MEM&&/r /dev/stdin' $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink <<< "$(_MTB_RECIPE__JLINK_ERASE_EXT_MEM)" > $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_erase.jlink; \
+		sed -i -e '/&&_MTB_RECIPE__JLINK_ERASE_EXT_MEM&&/d' $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_erase.jlink; \
+		sed -i -e 's/|/\n/g' $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_erase.jlink; \
+	fi
 	$(MTB__NOISE)mv -f $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/_erase.jlink $(MTB_TOOLS__OUTPUT_CONFIG_DIR)/erase.jlink
 
 jlink_path_check:

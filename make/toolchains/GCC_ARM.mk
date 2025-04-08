@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# (c) 2018-2024, Cypress Semiconductor Corporation (an Infineon company) or
+# (c) 2018-2025, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -238,13 +238,13 @@ else
 _MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS=
 endif
 else
-ifeq ($(VFP_SELECT),hardfp)
+ifeq ($(VFP_SELECT),softfp)
 ifeq ($(VFP_SELECT_PRECISION),singlefp)
-# FPv5 FPU, hardfp, single-precision
-_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-sp-d16
+# FPv5 FPU, softfp, single-precision
+_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
 else
-# FPv5 FPU, hardfp, double-precision
-_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-d16
+# FPv5 FPU, softfp, double-precision
+_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-d16
 endif
 else ifeq ($(VFP_SELECT),softfloat)
 # Software FP
@@ -255,11 +255,11 @@ _MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS=
 endif
 else
 ifeq ($(VFP_SELECT_PRECISION),singlefp)
-# FPv5 FPU, softfp, single-precision
-_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
+# FPv5 FPU, hardfp, single-precision
+_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-sp-d16
 else
-# FPv5 FPU, softfp, double-precision
-_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-d16
+# FPv5 FPU, hardfp, double-precision
+_MTB_TOOLCHAIN_GCC_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-d16
 endif
 endif
 endif

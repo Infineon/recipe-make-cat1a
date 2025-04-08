@@ -1,0 +1,54 @@
+        {
+            "name": "Launch &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (JLink)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "jlink",
+            "device": "&&_MTB_RECIPE__DEVICE_DEBUG&&",
+            "interface": "&&_MTB_RECIPE__PROBE_INTERFACE&&",
+            "serialNumber": "&&_MTB_RECIPE__PROBE_SERIAL&&",
+            "preLaunchCommands": [
+                // Program via the hex file to get complete coverage
+                "exec-file &&_MTB_RECIPE__HEX_FILE&&"
+            ],
+            "overrideRestartCommands": [
+                "starti"
+            ],
+            // svdFile is optional, it can be very large.
+            "svdFile": "&&_MTB_RECIPE__SVD_FILE_NAME&&",
+            "breakAfterReset": true,
+            "runToEntryPoint": "main",  // Specifies application entry point name where program will halt
+            "preLaunchTask": "Build",
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        },
+        // When using 'attach', make sure your program is running on the board and that your
+        // executable matches the image in the chip exactly, or else strange things can happen
+        // with breakpoints, variables, etc.
+        {
+            "name": "Attach &&_MTB_RECIPE__MCU_NAME&& &&_MTB_RECIPE__TARGET_PROCESSOR_NAME&& (JLink)",
+            "type": "cortex-debug",
+            "request": "attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "&&_MTB_RECIPE__ELF_FILE&&",
+            "servertype": "jlink",
+            "device": "&&_MTB_RECIPE__DEVICE_ATTACH&&",
+            "interface": "&&_MTB_RECIPE__PROBE_INTERFACE&&",
+            "serialNumber": "&&_MTB_RECIPE__PROBE_SERIAL&&",
+            "overrideRestartCommands": [
+                "starti"
+            ],
+            // svdFile is optional, it can be very large.
+            "svdFile": "&&_MTB_RECIPE__SVD_FILE_NAME&&",
+            "breakAfterReset": true,
+            "runToEntryPoint": "main",    // Specifies application entry point name for restart/reset
+            "showDevDebugOutput": "none",
+            "presentation": {
+                "hidden": false,
+                "group": "&&_MTB_RECIPE__TARGET_PROCESSOR_NAME&&"
+            }
+        }

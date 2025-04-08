@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# (c) 2018-2024, Cypress Semiconductor Corporation (an Infineon company) or
+# (c) 2018-2025, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -204,20 +204,7 @@ ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_FPU_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)
 _MTB_TOOLCHAIN_IAR__VFP_FLAGS:=
 _MTB_TOOLCHAIN_IAR__VFP_CFLAGS:=
 else
-ifeq ($(VFP_SELECT),hardfp)
-ifeq ($(VFP_SELECT_PRECISION),singlefp)
-# FPv5 FPU, hardfp, single-precision
-_MTB_TOOLCHAIN_IAR__VFP_FLAGS:=--fpu FPv5-SP
-else
-# FPv5 FPU, hardfp, double-precision
-_MTB_TOOLCHAIN_IAR__VFP_FLAGS:=--fpu FPv5_D16
-endif
-_MTB_TOOLCHAIN_IAR__VFP_CFLAGS:=$(_MTB_TOOLCHAIN_IAR__VFP_FLAGS) --aapcs vfp
-else ifeq ($(VFP_SELECT),softfloat)
-# Software FP
-_MTB_TOOLCHAIN_IAR__VFP_FLAGS:=
-_MTB_TOOLCHAIN_IAR__VFP_CFLAGS:=
-else
+ifeq ($(VFP_SELECT),softfp)
 ifeq ($(VFP_SELECT_PRECISION),singlefp)
 # FPv5 FPU, softfp, single-precision
 _MTB_TOOLCHAIN_IAR__VFP_FLAGS:=--fpu FPv5-SP
@@ -226,6 +213,19 @@ else
 _MTB_TOOLCHAIN_IAR__VFP_FLAGS:=--fpu FPv5_D16
 endif
 _MTB_TOOLCHAIN_IAR__VFP_CFLAGS:=$(_MTB_TOOLCHAIN_IAR__VFP_FLAGS) --aapcs std
+else ifeq ($(VFP_SELECT),softfloat)
+# Software FP
+_MTB_TOOLCHAIN_IAR__VFP_FLAGS:=
+_MTB_TOOLCHAIN_IAR__VFP_CFLAGS:=
+else
+ifeq ($(VFP_SELECT_PRECISION),singlefp)
+# FPv5 FPU, hardfp, single-precision
+_MTB_TOOLCHAIN_IAR__VFP_FLAGS:=--fpu FPv5-SP
+else
+# FPv5 FPU, hardfp, double-precision
+_MTB_TOOLCHAIN_IAR__VFP_FLAGS:=--fpu FPv5_D16
+endif
+_MTB_TOOLCHAIN_IAR__VFP_CFLAGS:=$(_MTB_TOOLCHAIN_IAR__VFP_FLAGS) --aapcs vfp
 endif
 endif
 endif

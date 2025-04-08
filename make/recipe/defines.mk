@@ -6,7 +6,8 @@
 #
 ################################################################################
 # \copyright
-# Copyright 2018-2024 Cypress Semiconductor Corporation
+# (c) 2018-2025, Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,9 +39,9 @@ _MTB_RECIPE__DEFAULT_PROGRAM_INTERFACE:=KitProg3
 # Compactibility interface for this recipe make
 #
 MTB_RECIPE__INTERFACE_VERSION:=2
-MTB_RECIPE__EXPORT_INTERFACES:=1 2 3
+MTB_RECIPE__EXPORT_INTERFACES:=1 2 3 4
 
-MTB_RECIPE__NINJA_SUPPORT:=1
+MTB_RECIPE__NINJA_SUPPORT:=1 2
 
 #
 # List the supported toolchains
@@ -106,6 +107,8 @@ _MTB_RECIPE__OPENOCD_GDBINIT_FILE:=gdbinit_secure
 _MTB_RECIPE__OPENOCD_EXTRA_PORT_FLAG:=
 _MTB_RECIPE__OPENOCD_EXTRA_PORT_ECLIPSE:=
 _MTB_RECIPE__OPENOCD_SECOND_RESET_TYPE:=init
+_MTB_RECIPE__OPENOCD_DO_CONTINUE=true
+_MTB_RECIPE__OPENOCD_SET_STOP_AT=true
 _MTB_RECIPE__OPENOCD_RUN_RESTART_CMD_DEBUG_ECLIPSE:=mon reset $(_MTB_RECIPE__OPENOCD_SECOND_RESET_TYPE)&\#13;&\#10;flushregs
 ifeq ($(MTB_RECIPE__CORE),CM0P)
 _MTB_RECIPE__OPENOCD_TARGET_AP:=set TARGET_AP cm0_ap
@@ -128,12 +131,14 @@ CY_OPENOCD_SHELL_TIMEOUT_ECLIPSE:=$(CY_OPENOCD_SHELL_TIMEOUT_CMD)&\#13;&\#10;
 _MTB_RECIPE__MULTICORE_SECOND_CONFIG_ECLIPSE=Add CM0+ to CM4
 _MTB_RECIPE__MULTICORE_SECOND_CONFIG_VSCODE=CM0+
 else # ifneq (,$(_MTB_RECIPE__IS_SECURE_DEVICE))
-_MTB_RECIPE__OPENOCD_RUN_RESTART_CMD_DEBUG_ECLIPSE:=mon reset $(_MTB_RECIPE__OPENOCD_SECOND_RESET_TYPE)&\#13;&\#10;mon psoc6 reset_halt sysresetreq&\#13;&\#10;flushregs&\#13;&\#10;mon gdb_sync&\#13;&\#10;stepi
+_MTB_RECIPE__OPENOCD_RUN_RESTART_CMD_DEBUG_ECLIPSE:=mon reset $(_MTB_RECIPE__OPENOCD_SECOND_RESET_TYPE)&\#13;&\#10;mon psoc6 reset_halt sysresetreq&\#13;&\#10;flushregs&\#13;&\#10;mon gdb_sync&\#13;&\#10;thread apply all stepi&\#13;&\#10;tbreak main&\#13;&\#10;thread apply all continue
 _MTB_RECIPE__OPENOCD_RUN_RESTART_CMD_ATTACH_ECLIPSE:=flushregs&\#13;&\#10;mon gdb_sync&\#13;&\#10;stepi
 _MTB_RECIPE__MULTICORE_SECOND_CONFIG_ECLIPSE=Add CM4 to CM0+
 _MTB_RECIPE__MULTICORE_SECOND_CONFIG_VSCODE=CM4
+_MTB_RECIPE__OPENOCD_DO_CONTINUE=false
+_MTB_RECIPE__OPENOCD_SET_STOP_AT=false
 ifneq (,$(_MTB_RECIPE__IS_TVII_DEVICE))
-_MTB_RECIPE__OPENOCD_RUN_RESTART_CMD_DEBUG_ECLIPSE:=mon reset $(_MTB_RECIPE__OPENOCD_SECOND_RESET_TYPE)&\#13;&\#10;mon traveo2 reset_halt sysresetreq&\#13;&\#10;flushregs&\#13;&\#10;mon gdb_sync&\#13;&\#10;stepi
+_MTB_RECIPE__OPENOCD_RUN_RESTART_CMD_DEBUG_ECLIPSE:=mon reset $(_MTB_RECIPE__OPENOCD_SECOND_RESET_TYPE)&\#13;&\#10;mon traveo2 reset_halt sysresetreq&\#13;&\#10;flushregs&\#13;&\#10;mon gdb_sync&\#13;&\#10;thread apply all stepi&\#13;&\#10;tbreak main&\#13;&\#10;thread apply all continue
 endif
 endif
 

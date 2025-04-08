@@ -6,7 +6,7 @@
 #
 ################################################################################
 # \copyright
-# (c) 2024, Cypress Semiconductor Corporation (an Infineon company) or
+# (c) 2024-2025, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -95,7 +95,7 @@ MTB_TOOLCHAIN_LLVM_ARM__OBJCOPY:=$(MTB_TOOLCHAIN_LLVM_ARM__BASE_DIR)/bin/llvm-ob
 # DEBUG/NDEBUG selection
 ifeq ($(CONFIG),Debug)
 _MTB_TOOLCHAIN_LLVM_ARM__DEBUG_FLAG:=-DDEBUG
-_MTB_TOOLCHAIN_LLVM_ARM__OPTIMIZATION:=-O1 -g -DMTB_LLVM_EMBEDDED_ARM
+_MTB_TOOLCHAIN_LLVM_ARM__OPTIMIZATION:=-O0 -g -DMTB_LLVM_EMBEDDED_ARM
 else ifeq ($(CONFIG),Release)
 _MTB_TOOLCHAIN_LLVM_ARM__DEBUG_FLAG:=-DNDEBUG
 _MTB_TOOLCHAIN_LLVM_ARM__OPTIMIZATION:=-Os -DMTB_LLVM_EMBEDDED_ARM
@@ -114,8 +114,7 @@ _MTB_TOOLCHAIN_LLVM_ARM__COMMON_FLAGS:=\
 	-Wall\
 	--target=arm-none-eabi\
 	-fintegrated-cc1\
-	-fintegrated-objemitter\
-	-flto
+	-fintegrated-objemitter
 
 #
 # CPU core specifics
@@ -123,13 +122,13 @@ _MTB_TOOLCHAIN_LLVM_ARM__COMMON_FLAGS:=\
 ifeq ($(MTB_RECIPE__CORE),CM0)
 # Arm Cortex-M0 CPU
 _MTB_TOOLCHAIN_LLVM_ARM__FLAGS_CORE:=-mcpu=cortex-m0
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfpu=none
 endif
 
 ifeq ($(MTB_RECIPE__CORE),CM0P)
 # Arm Cortex-M0+ CPU
 _MTB_TOOLCHAIN_LLVM_ARM__FLAGS_CORE:=-mcpu=cortex-m0plus
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfpu=none
 endif
 
 ifeq ($(MTB_RECIPE__CORE),CM4)
@@ -140,7 +139,7 @@ ifeq ($(VFP_SELECT),hardfp)
 _MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv4-sp-d16
 else ifeq ($(VFP_SELECT),softfloat)
 # Software FP
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfpu=none
 else
 # FPv4 FPU, softfp, single-precision
 _MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv4-sp-d16
@@ -160,7 +159,7 @@ _MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-d16
 endif
 else ifeq ($(VFP_SELECT),softfloat)
 # Software FP
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS=
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfpu=none
 else
 ifeq ($(VFP_SELECT_PRECISION),singlefp)
 # FPv5 FPU, softfp, single-precision
@@ -182,14 +181,14 @@ endif
 _MTB_TOOLCHAIN_LLVM_ARM__FLAGS_CORE:=-mcpu=cortex-m33$(_MTB_TOOLCHAIN_LLVM_ARM__DSP_FLAG_SUFFIX)
 ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_FPU_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)),)
 # Software FP
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS=
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=
 else
 ifeq ($(VFP_SELECT),hardfp)
 # FPv5 FPU, hardfp, single-precision only
 _MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-sp-d16
 else ifeq ($(VFP_SELECT),softfloat)
 # Software FP
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS=
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfpu=none
 else
 # FPv5 FPU, softfp, single-precision only
 _MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
@@ -234,33 +233,33 @@ _MTB_TOOLCHAIN_LLVM_ARM__FLAGS_CORE:=-mcpu=cortex-m55$(_MTB_TOOLCHAIN_LLVM_ARM__
 ifeq ($(filter $(MTB_RECIPE__CORE_NAME)_FPU_PRESENT,$(DEVICE_$(DEVICE)_FEATURES)),)
 # Software FP
 ifeq ($(MVE_SELECT),MVE-I)
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS=-mfloat-abi=hard -mfpu=auto
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard
 else
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS=
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=
 endif
 else
-ifeq ($(VFP_SELECT),hardfp)
+ifeq ($(VFP_SELECT),softfp)
 ifeq ($(VFP_SELECT_PRECISION),singlefp)
-# FPv5 FPU, hardfp, single-precision
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-sp-d16
+# FPv5 FPU, softfp, single-precision
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fp-armv8-fullfp16-sp-d16
 else
-# FPv5 FPU, hardfp, double-precision
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fpv5-d16
+# FPv5 FPU, softfp, double-precision
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fp-armv8-fullfp16-d16
 endif
 else ifeq ($(VFP_SELECT),softfloat)
 # Software FP
 ifeq ($(MVE_SELECT),MVE-I)
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS=-mfloat-abi=hard -mfpu=auto
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard
 else
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS=
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfpu=none
 endif
 else
 ifeq ($(VFP_SELECT_PRECISION),singlefp)
-# FPv5 FPU, softfp, single-precision
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-sp-d16
+# FPv5 FPU, hardfp, single-precision
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fp-armv8-fullfp16-sp-d16
 else
-# FPv5 FPU, softfp, double-precision
-_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=softfp -mfpu=fpv5-d16
+# FPv5 FPU, hardfp, double-precision
+_MTB_TOOLCHAIN_LLVM_ARM__VFP_FLAGS:=-mfloat-abi=hard -mfpu=fp-armv8-fullfp16-d16
 endif
 endif
 endif
