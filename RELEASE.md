@@ -16,6 +16,9 @@ This release of the PSOC™ 6 GNU make build recipe includes complete support fo
     * LLVM Embedded Toolchain for Arm (Experimental)
 
 ### What Changed?
+#### v2.6.0
+* Fixed inability to Attach to PSOC6 MCU running FreeRTOS application due to 'Cannot execute this command without a live selected thread'
+
 #### v2.5.0
 * Moved CFLAGS, CXXFLAGS, ASFLAGS, LDFLAGS variables to be added after default flags. In case of conflict, most toolchains select the last flags as the option. This allows those variables to overwrite the default flags.
 * Added support for GNU assembly syntax when using ARM toolchain.
